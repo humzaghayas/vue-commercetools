@@ -66,7 +66,9 @@ export default {
     }],
     'cookie-universal-nuxt',
     'vue-scrollto/nuxt',
-    '@vue-storefront/middleware/nuxt'
+    '@vue-storefront/middleware/nuxt',
+    '@nuxt/http',
+    '@nuxtjs/apollo'
   ],
   i18n: {
     currency: 'USD',
@@ -150,5 +152,12 @@ export default {
       }
     },
     display: 'swap'
+  },
+  apollo: {
+    clientConfigs: {
+      default: {
+        httpEndpoint: 'https://ms-gateway-f4b4o225iq-ue.a.run.app/graphql',
+      },
+    },
   }
 };
