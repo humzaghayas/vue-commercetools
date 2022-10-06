@@ -26,46 +26,46 @@
                  <h5>State</h5>
                   {{quote.quoteState}}
               </div>
-</td>
-<td valign="top">
-   <div>
-      <table>
-        <tr>
-          <td><h5>Original Total</h5></td>
-          <td style="margin-left:10px;">
-            <p v-if="quote.totalPrice"> 
-               ${{quote.totalPrice.centAmount/100}}
-            </p>
-            <p v-else>
-              $0
-            </p>
+        </td>
+        <td valign="top">
+          <div>
+              <table>
+                <tr>
+                  <td><h5>Original Total</h5></td>
+                  <td style="margin-left:10px;">
+                    <p v-if="quote.totalPrice"> 
+                      ${{quote.totalPrice.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><h5>Discount</h5></td>
+                  <td style="margin-left:10px;">
+                    <p v-if="quote.amountDiscount"> 
+                      {{quote.amountDiscount.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="line"><h5>Fianl Total</h5></td>
+                  <td style="margin-left:10px;"> 
+                    <p v-if="quote.totalPrice"> 
+                      ${{quote.totalPrice.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </td>
+                </tr>
+              </table>
+          </div>
           </td>
-        </tr>
-        <tr>
-          <td><h5>Discount</h5></td>
-          <td style="margin-left:10px;">
-            <p v-if="quote.amountDiscount"> 
-              {{quote.amountDiscount.centAmount/100}}
-            </p>
-            <p v-else>
-              $0
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td class="line"><h5>Fianl Total</h5></td>
-          <td style="margin-left:10px;"> 
-            <p v-if="quote.totalPrice"> 
-              ${{quote.totalPrice.centAmount/100}}
-            </p>
-            <p v-else>
-              $0
-            </p>
-          </td>
-        </tr>
-      </table>
-   </div>
-  </td>
   </tr>
   </table>
 
@@ -92,9 +92,9 @@
       <th width="10%">Total</th>
       <th width="10%">Actions</th>
     </tr>
-    <tr v-for="prd in quote.lineItems" :key="prd" >
+    <tr v-for="prd in quote.lineItems" :key="prd.variant.sku" >
       <td width="20%" style="text-align: center;">
-        <p v-for="name in prd.nameAllLocales" :key="name" v-show="name.locale === 'en'">
+        <p v-for="name in prd.nameAllLocales" :key="name.locale" v-show="name.locale === 'en'">
             {{name.value}}
         </p>
       </td>

@@ -27,6 +27,10 @@
         <SfContentPage title="My newsletter">
           <MyNewsletter />
         </SfContentPage>
+
+        <SfContentPage title="My quotes">
+          <MyQuotes />
+        </SfContentPage>
       </SfContentCategory>
 
       <SfContentCategory title="Order details">
@@ -48,6 +52,8 @@ import ShippingDetails from './MyAccount/ShippingDetails';
 import BillingDetails from './MyAccount/BillingDetails';
 import MyNewsletter from './MyAccount/MyNewsletter';
 import OrderHistory from './MyAccount/OrderHistory';
+import MyQuotes from './MyAccount/MyQuotes';
+
 import {
   mapMobileObserver,
   unMapMobileObserver
@@ -62,7 +68,8 @@ export default {
     ShippingDetails,
     BillingDetails,
     MyNewsletter,
-    OrderHistory
+    OrderHistory,
+    MyQuotes
   },
   middleware: [
     'is-authenticated'
@@ -76,7 +83,10 @@ export default {
     const activePage = computed(() => {
       const { pageName } = route.value.params;
 
+      console.log("Humza : "+pageName);
+
       if (pageName) {
+        console.log("Humza 1 : "+(pageName.charAt(0).toUpperCase() + pageName.slice(1)).replace('-', ' '));
         return (pageName.charAt(0).toUpperCase() + pageName.slice(1)).replace('-', ' ');
       } else if (!isMobile.value) {
         return 'My profile';

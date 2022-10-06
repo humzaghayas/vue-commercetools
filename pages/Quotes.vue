@@ -12,8 +12,9 @@
             <th> Quote Number</th>
             <th> Quote State</th>
             <th> Company Name</th>
-            <th> Employee Email</th>
+            <th> quotes Email</th>
             <th> Total Price</th>
+            <th> Products</th>
         </tr>
           <tr v-for="quotes in quotes.results" :key="quotes" style="border: solid;">
             <td>
@@ -26,7 +27,7 @@
               {{ quotes.company.name }}
             </td>
             <td>
-              {{ quotes.employeeEmail}}
+              {{ quotes.quotesEmail}}
             </td>
             <td>
               <p v-if="quotes.totalPrice"> 
@@ -35,6 +36,50 @@
               <p v-else>
                 $0
               </p>
+            </td>
+            <td>
+              
+
+
+              <span class="products" @click="showModal(quotes.id)">
+                Products
+              </span>
+                <Modal
+                  v-show="isModalVisible === quotes.id"
+                  @close="closeModal"
+                >
+                  <template v-slot:header>
+                    Shipping Address
+                  </template>
+                  <template v-slot:body>
+                    <div v-for="prd in quotes.lineItems" :key="prd.variant.sku">
+                      <div><span>Name</span> : 
+                        <p v-for="name in prd.nameAllLocales" :key="name.value" v-show="name.locale === 'en'">
+                            {{name.value}}
+                        </p>
+                      </div>
+                      <div><span>SKU</span> : 
+                        <span v-if="prd.variant.sku">
+                          {{prd.variant.sku}}
+                        </span>
+                      </div>
+                      <div><span>Unit Price</span> : 
+                        <p v-if="prd.price"> 
+                            {{prd.price.value.centAmount/100}} - {{prd.price.value.currencyCode}}
+                        </p>
+                        <p v-else>
+                          0
+                        </p>
+                      </div>
+
+                      <div style="border-top:solid 2px ;"></div>
+                    </div> 
+                  </template>
+                  <template v-slot:footer>
+
+                  </template>
+                </Modal>
+
             </td>
           </tr>
         </table>
@@ -47,6 +92,7 @@
 </template>
 <script>
 import gql from 'graphql-tag'
+import Modal from '../components/Modal.vue'
 
 const ALL_QUOTES_QUERY = gql`
 query GET_ALL_QUOTES{
@@ -67,11 +113,46 @@ query GET_ALL_QUOTES{
         id,
         name
       }
+      lineItems{
+        nameAllLocales{
+          locale
+          value
+        }
+        price{
+          value{
+            currencyCode
+            centAmount
+          }
+        }
+        totalPrice{
+          centAmount
+          currencyCode
+        }
+        variant{
+          sku
+        }
+      }
     }
   }
 }
 `;
 export default {
+  components: {
+      Modal,
+    },
+    data() {
+      return {
+        isModalVisible: false,
+      };
+    },
+    methods: {
+      showModal(id) {
+        this.isModalVisible = id;
+      },
+      closeModal() {
+        this.isModalVisible = "";
+      }
+    },
   apollo: {
     quotes: {
       query: ALL_QUOTES_QUERY,
@@ -147,5 +228,19 @@ p {
 
   .button:hover  {
     background-color: #04AA6D;
+  }
+
+  
+  .products {
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin-left: 20px;
+    color: blue;
+    cursor: pointer; 
+  }
+
+  .products:hover  {
+    color: red;
   }
 </style>
