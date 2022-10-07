@@ -196,7 +196,7 @@ export default {
         const client = app.apolloProvider.defaultClient;
 
 
-        const {data}= await $vsf.$ct.api.getMe({customer:true});;
+        const {data}= await $vsf.$ct.api.getMe({customer:true});
         const email = data.me.customer.email;
         console.log("Data : "+ JSON.stringify(email));
 

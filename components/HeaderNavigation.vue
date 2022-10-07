@@ -1,36 +1,40 @@
 <template>
-  <div class="sf-header__navigation desktop" v-if="!isMobile">
-    <SfHeaderNavigationItem
-      v-for="(category, index) in categories"
-      :key="index"
-      class="nav-item"
-      v-e2e="`app-header-url_${category}`"
-      :label="category"
-      :link="localePath(`/c/${category}`)"
-    />
+  <div v-if="!loading">
+    <div class="sf-header__navigation desktop" v-if="!isMobile">
+      <SfHeaderNavigationItem
+        v-for="(category, index) in categories"
+        :key="index"
+        class="nav-item"
+        v-e2e="`app-header-url_${category}`"
+        :label="category.name"
+        :link="localePath(`/c/${category}`)"
+      />
+    </div>
+    <SfModal v-else :visible="isMobileMenuOpen">
+      <SfHeaderNavigationItem
+        v-for="(category, index) in categories"
+        :key="index"
+        class="nav-item"
+        v-e2e="`app-header-url_${category}`"
+      >
+        <template #mobile-navigation-item>
+          <SfMenuItem
+            :label="category.name"
+            class="sf-header-navigation-item__menu-item"
+            :link="localePath(`/c/${category}`)"
+            @click="toggleMobileMenu"
+          />
+        </template>
+      </SfHeaderNavigationItem>
+    </SfModal>
   </div>
-  <SfModal v-else :visible="isMobileMenuOpen">
-    <SfHeaderNavigationItem
-      v-for="(category, index) in categories"
-      :key="index"
-      class="nav-item"
-      v-e2e="`app-header-url_${category}`"
-    >
-      <template #mobile-navigation-item>
-        <SfMenuItem
-          :label="category"
-          class="sf-header-navigation-item__menu-item"
-          :link="localePath(`/c/${category}`)"
-          @click="toggleMobileMenu"
-        />
-      </template>
-    </SfHeaderNavigationItem>
-  </SfModal>
 </template>
 
 <script>
 import { SfMenuItem, SfModal } from '@storefront-ui/vue';
 import { useUiState } from '~/composables';
+import { useCategory } from '@vue-storefront/commercetools';
+import { onSSR } from '@vue-storefront/core'
 
 export default {
   name: 'HeaderNavigation',
@@ -46,12 +50,17 @@ export default {
   },
   setup() {
     const { isMobileMenuOpen, toggleMobileMenu } = useUiState();
-    const categories = ['women', 'men'];
+    const { categories, search, loading } = useCategory();
+
+    // onSSR(async () => {
+    //   await search({});
+    // });
 
     return {
       categories,
       isMobileMenuOpen,
-      toggleMobileMenu
+      toggleMobileMenu,
+      loading
     };
   }
 };

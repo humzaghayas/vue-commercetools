@@ -1,6 +1,5 @@
 <template>
-  <div>Test</div>
-  <!-- <div id="category" v-if="!loading">
+  <div id="category" v-if="!loading">
     <SfBreadcrumbs
       class="breadcrumbs desktop-only"
       :breadcrumbs="breadcrumbs"
@@ -189,7 +188,7 @@
         </div>
       </SfLoader>
     </div>
-  </div> -->
+  </div>
 </template>
 
 <script>
@@ -216,8 +215,10 @@ import { useCart, useWishlist, productGetters, useFacet, facetGetters, wishlistG
 import { useUiHelpers, useUiState } from '~/composables';
 import { onSSR } from '@vue-storefront/core';
 import LazyHydrate from 'vue-lazy-hydration';
-import cacheControl from './../helpers/cacheControl';
+import cacheControl from './../../helpers/cacheControl';
 import CategoryPageHeader from '~/components/CategoryPageHeader';
+
+import { CategorySearch } from '@vue-storefront/commercetools-api';
 
 // TODO(addToCart qty, horizontal): https://github.com/vuestorefront/storefront-ui/issues/1606
 export default {
@@ -233,31 +234,34 @@ export default {
     const { result, search, loading, error } = useFacet();
     const { addItem: addItemToWishlist, isInWishlist, removeItem: removeItemFromWishlist, wishlist } = useWishlist();
 
-    // onSSR(async () => {
-    //   await search({
-    //     categorySlug: 'Medicines',
-    //     itemsPerPage: 10,
-    //   });
-    // });
+    onSSR(async () => {
+      await search({
+        categorySlug: 'Medicines',
+        rootCatSlug:'Medicine',
+        itemsPerPage: 10,
+        sort:'latest',
+        filters: { },
+      });
+    });
 
 
     const productsQuantity = ref({});
     const products = computed(() => facetGetters.getProducts(result.value));
-    const categoryTree = [];//computed(() => facetGetters.getCategoryTree(result.value));
+    const categoryTree = computed(() => facetGetters.getCategoryTree(result.value));
     const breadcrumbs = computed(() => facetGetters.getBreadcrumbs(result.value));
     const pagination = computed(() => facetGetters.getPagination(result.value));
     const activeCategory = [];
-    // computed(() => {
-    //   const items = categoryTree.value.items;
+    computed(() => {
+      const items = categoryTree.value.items;
 
-    //   if (!items || !items.length) {
-    //     return '';
-    //   }
+      if (!items || !items.length) {
+        return '';
+      }
 
-    //   const category = items.find(({ isCurrent, items }) => isCurrent || items.find(({ isCurrent }) => isCurrent));
+      const category = items.find(({ isCurrent, items }) => isCurrent || items.find(({ isCurrent }) => isCurrent));
 
-    //   return category?.label || items[0].label;
-    // });
+      return category?.label || items[0].label;
+    });
 
     const removeProductFromWishlist = (productItem) => {
       const productsInWhishlist = computed(() => wishlistGetters.getItems(wishlist.value));
@@ -273,12 +277,12 @@ export default {
       });
     };
 
-    onSSR(async () => {
+    // onSSR(async () => {
 
-      console.log('TH :  '+ JSON.stringify( th.getFacetsFromURL()));
-      await search(th.getFacetsFromURL());
-      if (error?.value?.search) context.root.$nuxt.error({ statusCode: 404 });
-    });
+    //   console.log('TH :  '+ JSON.stringify( th.getFacetsFromURL()));
+    //   await search(th.getFacetsFromURL());
+    //   if (error?.value?.search) context.root.$nuxt.error({ statusCode: 404 });
+    // });
 
     return {
       ...uiState,
@@ -298,10 +302,12 @@ export default {
       productsQuantity
     };
   },
-  async asyncData(){
+  // async asyncData({ app, params ,loading,$vsf}){
+  //   const data= await $vsf.$ct.api.getFacetProductProjection({page:0,perPage:5});
 
+  //   console.log('data : '+JSON.stringify(data));
     
-  },
+  // },
   components: {
     CategoryPageHeader,
     SfButton,

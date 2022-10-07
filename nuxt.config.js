@@ -43,7 +43,21 @@ export default {
     // to core soon
     '@nuxtjs/pwa',
     ['@vue-storefront/commercetools/nuxt', {
-      i18n: { useNuxtI18nConfig: true }
+      i18n: { useNuxtI18nConfig: true },
+      faceting: {
+        pageOptions: [20, 50, 100],
+        subcategoriesLimit: 100,
+        availableFacets: [
+          { facet: 'categories.id', type: 'string', option: 'subtree("*")', name: 'category', filteringStrategy: 'query' }, // Don't change the "name" of this facet
+        ],
+        sortingOptions: [
+          { id: 'latest', name: 'Latest', facet: 'createdAt', direction: 'desc' },
+          { id: 'price-up', name: 'Price from low to high', facet: 'price', direction: 'asc' },
+          { id: 'price-down', name: 'Price from high to low', facet: 'price', direction: 'desc' },
+          { id: 'relevance', name: 'Relevance', facet: 'score', direction: 'desc' }
+        ],
+        filteringStrategy: 'filter'
+      }
     }],
     ['@vue-storefront/nuxt', {
       coreDevelopment: true,
