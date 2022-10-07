@@ -142,8 +142,8 @@ export default {
        createQuote () {
 
         let currency="USD";
-        let employeeEmail="ranjithkumar.r@royalcyber.com";
-        let employeeId="604c280a-f94c-4586-915e-648c15ae9cc9";
+        let employeeEmail="humza.ghayas@royalcyber.com";
+        let employeeId="1132ee81-116c-4cd5-b982-3faab4a3d4b0";
         let companyId="9e7e7700-3f38-11ed-920a-5ffc1af93431";
 
         let lineItems:any = [];

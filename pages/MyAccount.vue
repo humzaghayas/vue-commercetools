@@ -29,7 +29,7 @@
         </SfContentPage>
 
         <SfContentPage title="My quotes">
-          <MyQuotes />
+          <MyQuotes :quotes="quotes"/>
         </SfContentPage>
       </SfContentCategory>
 
@@ -59,6 +59,64 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer.js';
 
+import gql from 'graphql-tag'
+    //import { useUser } from '@vue-storefront/commercetools';
+  
+      const ALL_QUOTES_QUERY = gql`
+      query GET_ALL_QUOTES ($limit:Int,$offset:Int,$employeeEmail:String){
+      quotes (limit:$limit,offset:$offset,employeeEmail:$employeeEmail){
+          count
+          total
+          results{
+          id
+          version
+          employeeEmail
+          quoteState
+          quoteNumber
+          percentageDiscount
+          totalPrice{
+              centAmount,
+              currencyCode
+          }
+          company{
+              id,
+              name
+          }
+          lineItems{
+            quantity
+            price{
+              value{
+                currencyCode
+                centAmount
+              }
+            }
+            originalPrice{
+              centAmount
+              currencyCode
+            }
+            totalPrice{
+              centAmount
+              currencyCode
+            }
+            nameAllLocales{
+              locale
+              value
+            }
+            variant{
+              sku
+              price{
+                value{
+                  centAmount
+                  currencyCode
+                }
+              }
+            }
+          }
+          }
+      }
+      }
+      `;
+
 export default {
   name: 'MyAccount',
   components: {
@@ -78,7 +136,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
 
-    const { logout } = useUser();
+    const { logout ,user} = useUser();
     const isMobile = computed(() => mapMobileObserver().isMobile.get());
     const activePage = computed(() => {
       const { pageName } = route.value.params;
@@ -98,6 +156,8 @@ export default {
     const changeActivePage = async (title) => {
       if (title === 'Log out') {
         await logout();
+
+        user;
         router.push(context.root.localePath({ name: 'home' }));
         return;
       }
@@ -113,7 +173,9 @@ export default {
       unMapMobileObserver();
     });
 
-    return { changeActivePage, activePage };
+    const email= computed(() => userGetters.getEmailAddress(user.value));
+
+    return { changeActivePage, activePage,email };
   },
 
   data() {
@@ -129,7 +191,30 @@ export default {
         }
       ]
     };
-  }
+  },
+  async asyncData({ app, params ,loading,$vsf}) {
+        const client = app.apolloProvider.defaultClient;
+
+
+        const {data}= await $vsf.$ct.api.getMe({customer:true});;
+        const email = data.me.customer.email;
+        console.log("Data : "+ JSON.stringify(email));
+
+
+        const { quoteId } = params;
+        const res = await client.query({
+            query: ALL_QUOTES_QUERY,
+            variables: {
+              "limit": 10,
+              "offset": 0,
+              "employeeEmail": email
+            },
+        });
+        const { quotes } = res.data;
+        return {
+            quotes,
+        };
+    },
 };
 </script>
 

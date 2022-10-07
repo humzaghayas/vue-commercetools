@@ -350,7 +350,7 @@
     
     export default  {
       name: 'QuotesList',
-
+      props: ['quotes'],
       setup() {
         const currentQuote=ref(null);
 
@@ -373,12 +373,12 @@
           // firstName: user.value,
         };
       },
-      apollo: {
-          quotes: {
-          query: ALL_QUOTES_QUERY,
-          prefetch: true,
-          },
-      },
+      // apollo: {
+      //     quotes: {
+      //     query: ALL_QUOTES_QUERY,
+      //     prefetch: true,
+      //     },
+      // },
       methods :{
 
         updateQuoteStatus(status,id,ver) {
