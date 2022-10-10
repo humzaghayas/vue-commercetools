@@ -1,4 +1,5 @@
 const {categorySearch} =require( './categorySearch');
+const {customQueries} =require( './custom-queries');
 
 module.exports = {
   integrations: {
@@ -13,6 +14,7 @@ module.exports = {
           }
         }
       ],
+      customQueries,
       configuration: {
         api: {
           uri: 'https://api.us-central1.gcp.commercetools.com/drl-dev/graphql',

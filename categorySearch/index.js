@@ -6,12 +6,19 @@ const {query} = require( './defaultQuery');
 
 const categorySearch = async (context, params, customQuery) => {
   const { acceptLanguage } = context.config;
+
+  const{slug} = params;
+
   const defaultVariables = params ? {
     limit: params.limit,
     offset: params.offset,
     locale:"en" ,
-    id:"34b7e583-1827-4b24-ba59-a76ee947ad56"
-  } : { id:"34b7e583-1827-4b24-ba59-a76ee947ad56",locale:"en" }; 
+    "where":"id=\""+slug+"\""
+  } : { 
+    "where":"id=\""+slug+"\"",locale:"en",
+    limit: 10,
+    offset: 0
+   }; 
 
   const { categorySearch } = context.extendQuery(customQuery,
     { categorySearch: { query: query, variables: defaultVariables } }

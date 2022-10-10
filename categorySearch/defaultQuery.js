@@ -1,9 +1,11 @@
 const {gql }= require('graphql-tag');
 
 module.exports.query= gql`
-query($where:String,$locale:Locale){
-  categories(where:$where){
-    
+query CategorySearch($where:String,$locale:Locale,$limit:Int,$offset:Int){
+  categories(where:$where,limit:$limit,offset:$offset){
+    count
+    total
+    offset
     results{
     	slug(locale:$locale)
       name(locale:$locale)

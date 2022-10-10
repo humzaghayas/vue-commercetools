@@ -96,6 +96,17 @@
                 {{ $t('Go to checkout') }}
               </SfButton>
             </nuxt-link>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+
+            <nuxt-link :to="'/createquote'">
+              <SfButton
+                class="sf-button--full-width color-secondary"
+                @click="toggleCartSidebar"
+              >
+                {{ $t('Create quote') }}
+              </SfButton>
+            </nuxt-link>
           </div>
           <div v-else>
             <SfButton

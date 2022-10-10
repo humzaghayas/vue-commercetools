@@ -210,7 +210,7 @@ import {
   SfColor,
   SfProperty
 } from '@storefront-ui/vue';
-import { computed, ref } from '@nuxtjs/composition-api';
+import { computed, ref,useRoute} from '@nuxtjs/composition-api';
 import { useCart, useWishlist, productGetters, useFacet, facetGetters, wishlistGetters } from '@vue-storefront/commercetools';
 import { useUiHelpers, useUiState } from '~/composables';
 import { onSSR } from '@vue-storefront/core';
@@ -233,11 +233,18 @@ export default {
     const { addItem: addItemToCart, isInCart } = useCart();
     const { result, search, loading, error } = useFacet();
     const { addItem: addItemToWishlist, isInWishlist, removeItem: removeItemFromWishlist, wishlist } = useWishlist();
+    
+   
+    const route = useRoute();
+    const { query, params } = route.value;
+    const categoryId  =params.categoryId;
+
+    console.log("Category : "+JSON.stringify(categoryId));
+    console.log("Category1 : "+JSON.stringify(params));
 
     onSSR(async () => {
       await search({
-        categorySlug: 'Medicines',
-        rootCatSlug:'Medicine',
+        categorySlug: categoryId,
         itemsPerPage: 10,
         sort:'latest',
         filters: { },

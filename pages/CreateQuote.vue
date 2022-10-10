@@ -1,0 +1,416 @@
+<template>
+    <div >
+      <div v-if="loading" class="loading">
+        </div>
+      <div v-else>
+        <SfTabs :open-tab="1">
+          <SfTab title="My quotes">
+            <div v-if="products">
+              <h3>Products</h3>
+              <SfTable class="products">
+                <SfTableHeading>
+                  <SfTableHeader class="products__name">{{ $t('Product') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Orignal Unit Price') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Unit Price') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Quantity') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Subtotal') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Tax') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Total') }}</SfTableHeader>
+                </SfTableHeading>
+                <SfTableRow v-for="(item, i) in products" :key="i">
+                  <SfTableData class="products__name">
+                    <!-- <nuxt-link :to="'/p/'+orderGetters.getItemSku(item)+'/'+orderGetters.getItemSku(item)">
+                      {{ orderGetters.getItemName(item) }}
+                    </nuxt-link> -->
+                    <p >
+                        {{item.name}}
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.price"> 
+                        ${{item.price.value.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.price"> 
+                        ${{item.price.value.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.quantity"> 
+                      {{item.quantity}}
+                    </p>
+                    <p v-else>
+                      0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.totalPrice"> 
+                        ${{item.totalPrice.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>0</SfTableData>
+                  <SfTableData>
+  
+                    <p v-if="item.totalPrice"> 
+                        ${{item.totalPrice.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                </SfTableRow>
+              </SfTable>
+              <div>&nbsp;</div>
+              <div>&nbsp;</div>
+              <div v-if="!$apollo.loading" >
+                <a class="button" :href="'#'" @click="createQuote(employeeId,email,companyId,currency)">Submit Quote</a>currency :
+                <span>&nbsp;&nbsp;</span>
+                <a class="button" :href="'#'">Cancel Quote</a>
+              </div>
+            </div>
+
+      
+          </SfTab>
+        </SfTabs>
+        </div>
+      </div>
+      </template>
+      
+      <script>
+      import {
+        SfTabs,
+        SfTable,
+        SfButton,
+        SfProperty,
+        SfLink,
+        SfArrow
+      } from '@storefront-ui/vue';
+      import { computed, ref } from '@nuxtjs/composition-api';
+      import gql from 'graphql-tag'
+      import {  useCart, cartGetters, useUser, userGetters } from '@vue-storefront/commercetools';
+      import { onSSR } from '@vue-storefront/core';
+      //import { useUser } from '@vue-storefront/commercetools';
+    
+      const CREATE_QUOTE_MUTATION = gql`
+          mutation CREATE_QUOTE_MUTATION($draft:CreateQuoteDraft!){
+            createQuote(draft:$draft){
+              employeeId
+              employeeEmail
+            }
+          }
+          `;
+
+          const GET_EMPLOYEE_DETAIL_QUERY=gql`
+          query($where:String){
+              employees(where:$where){
+                offset
+                results{
+                  employeeNumber
+                  email
+                  id
+                  companyName
+                  customerGroup{
+                    key
+                  }
+                }
+              }
+            }
+          `
+      
+      export default  {
+        name: 'QuotesList',
+        props: ['quotes'],
+        setup() {
+          const currentQuote=ref(null);
+          const { cart ,load,loading} = useCart();
+          const user = useUser();
+          let u = {};
+
+          onSSR(async () => {
+                await user.load();
+                await load();
+                });
+
+          const currentEmail = userGetters.getEmailAddress(user.user.value);
+          const customerNumber = user.user.value;
+  
+          const tableHeaders = [
+            'Quote Number',
+            'Quote State',
+            'Company Name',
+            'Employee Email',
+            'Total Price'
+            ];
+
+            // onSSR(async () => {
+            //     await load();
+            //     });
+
+            const products = computed(() => cartGetters.getItems(cart.value));
+            let currencyCode = ref('');
+
+            if(products != null && products.value.length > 0){
+              currencyCode = products.value[0].price.value.currencyCode;
+            }
+  
+            // const { user, register, login, loading } = useUser();
+              
+            return {
+            tableHeaders,
+            currentQuote,
+            products,
+            currencyCode,
+            loading,
+            currentEmail,
+            customerNumber
+            // register,
+            // login,
+            // loading,
+            // firstName: user.value,
+          };
+        },
+        // apollo: {
+        //     quotes: {
+        //     query: ALL_QUOTES_QUERY,
+        //     prefetch: true,
+        //     },
+        // },
+        methods :{
+  
+              createQuote (employeeId,employeeEmail,companyId,currency) {
+                  // let currency=this.currencyCode;
+                  // let employeeEmail=email;
+                  // let employeeId=customerNumber;
+                  // let companyId="9e7e7700-3f38-11ed-920a-5ffc1af93431";
+
+                  let lineItems = [];
+
+                  console.log('prd : '+JSON.stringify(this.products));
+
+                  for (var i=0 ;i < this.products.length ; i++) {
+
+                    var prd= this.products[i];
+                    let val ={ 
+                          sku:prd.variant.sku,
+                          quantity: parseInt(prd.quantity) 
+                      }
+                      lineItems.push(val);
+                  }
+
+                  if(lineItems.length == 0){
+                    alert('Please add some items!');
+                    return false;
+                  }
+
+
+                  let createQuoteDraft = {"draft":{
+                        currency,
+                        employeeEmail,
+                        employeeId,
+                        companyId,
+                        lineItems
+                      }
+                    } ;
+
+                  console.log(createQuoteDraft);
+                  this.$apollo.mutate({
+                    mutation: CREATE_QUOTE_MUTATION,
+                    variables: createQuoteDraft
+                  }).then(() => { 
+                    alert('Qoute Created!');
+                  }).catch((res) => {
+                    alert('Error Occured!')
+                  });
+
+                  return false;
+                  }
+        },
+        async asyncData({ app, params ,loading,$vsf}) {
+
+          const client = app.apolloProvider.defaultClient;
+          const {data}= await $vsf.$ct.api.getMe({customer:true});
+          const email = data.me.customer.email;
+          console.log("Data : "+ JSON.stringify(email));
+
+          const res = await client.query({
+              query: GET_EMPLOYEE_DETAIL_QUERY,
+              variables: {
+                "limit": 10,
+                "offset": 0,
+                "where": "email=\""+email+"\""
+              },
+          });
+          const results = res.data.employees.results;
+          let currency=data.me.activeCart.lineItems[0].price.value.currencyCode;
+          let employeeId="";
+          let companyId="";
+
+          if(results != null && results.length > 0){
+             employeeId= results[0].id;
+             companyId= results[0].customerGroup.key; 
+          }
+          return {
+            currency,
+            employeeId,
+            companyId,
+            email
+          };
+        },
+        components: {
+          SfTabs,
+          SfTable,
+          SfButton,
+          SfProperty,
+          SfLink,
+          SfArrow
+        }
+      };
+      </script>
+      
+      <style lang='scss' scoped>
+      .pagination {
+        padding-top: var(--spacer-base);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .pagination-count {
+        padding: 0 var(--spacer-base);
+      }
+      .no-orders {
+        &__title {
+          margin: 0 0 var(--spacer-lg) 0;
+          font: var(--font-weight--normal) var(--font-size--base) / 1.6 var(--font-family--primary);
+        }
+        &__button {
+          --button-width: 100%;
+          @include for-desktop {
+            --button-width: 17,5rem;
+          }
+        }
+      }
+      .orders {
+        @include for-desktop {
+          &__element {
+            &--right {
+              --table-column-flex: 1;
+              text-align: right;
+            }
+          }
+        }
+      }
+      .all-orders {
+        --button-padding: var(--spacer-base) 0;
+      }
+      .message {
+        margin: 0 0 var(--spacer-xl) 0;
+        font: var(--font-weight--light) var(--font-size--base) / 1.6 var(--font-family--primary);
+        &__link {
+          color: var(--c-primary);
+          font-weight: var(--font-weight--medium);
+          font-family: var(--font-family--primary);
+          font-size: var(--font-size--base);
+          text-decoration: none;
+          &:hover {
+            color: var(--c-text);
+          }
+        }
+      }
+      .product {
+        &__properties {
+          margin: var(--spacer-xl) 0 0 0;
+        }
+        &__property,
+        &__action {
+          font-size: var(--font-size--sm);
+        }
+        &__action {
+          color: var(--c-gray-variant);
+          font-size: var(--font-size--sm);
+          margin: 0 0 var(--spacer-sm) 0;
+          &:last-child {
+            margin: 0;
+          }
+        }
+        &__qty {
+          color: var(--c-text);
+        }
+      }
+      .products {
+        --table-column-flex: 1;
+        &__name {
+          margin-right: var(--spacer-sm);
+          @include for-desktop {
+            --table-column-flex: 2;
+          }
+        }
+      }
+      .highlighted {
+        box-sizing: border-box;
+        width: 100%;
+        background-color: var(--c-light);
+        padding: var(--spacer-sm);
+        --property-value-font-size: var(--font-size--base);
+        --property-name-font-size: var(--font-size--base);
+        &:last-child {
+          margin-bottom: 0;
+        }
+        ::v-deep .sf-property__name {
+          white-space: nowrap;
+        }
+        ::v-deep .sf-property__value {
+          text-align: right;
+        }
+        &--total {
+          margin-bottom: var(--spacer-sm);
+        }
+        @include for-desktop {
+          padding: var(--spacer-xl);
+          --property-name-font-size: var(--font-size--lg);
+          --property-name-font-weight: var(--font-weight--medium);
+          --property-value-font-size: var(--font-size--lg);
+          --property-value-font-weight: var(--font-weight--semibold);
+        }
+      }
+  
+      h3,h5,p {
+        margin-top: 2px;
+        margin-bottom: 2px;
+      }
+      .handMouseOver {
+       cursor: pointer; 
+      }
+      .right {
+      display: block;
+      float: right;
+      width: 150px;
+      border: 3px solid gray;
+    }
+
+    .button {
+      border: 2px solid #04AA6D;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-left: 20px;
+      color: blue;
+    }
+
+    .button:hover  {
+      background-color: #04AA6D;
+    }
+
+      </style>
+      

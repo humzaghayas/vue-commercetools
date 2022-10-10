@@ -7,7 +7,7 @@
         class="nav-item"
         v-e2e="`app-header-url_${category}`"
         :label="category.name"
-        :link="localePath(`/c/${category}`)"
+        :link="localePath(`/c/${category.id}`)"
       />
     </div>
     <SfModal v-else :visible="isMobileMenuOpen">
@@ -15,13 +15,13 @@
         v-for="(category, index) in categories"
         :key="index"
         class="nav-item"
-        v-e2e="`app-header-url_${category}`"
+        v-e2e="`app-header-url_${category.id}`"
       >
         <template #mobile-navigation-item>
           <SfMenuItem
             :label="category.name"
             class="sf-header-navigation-item__menu-item"
-            :link="localePath(`/c/${category}`)"
+            :link="localePath(`/c/${category.id}`)"
             @click="toggleMobileMenu"
           />
         </template>
@@ -52,9 +52,11 @@ export default {
     const { isMobileMenuOpen, toggleMobileMenu } = useUiState();
     const { categories, search, loading } = useCategory();
 
-    // onSSR(async () => {
-    //   await search({});
-    // });
+    onSSR(async () => {
+      await search({customQuery: {
+        categories: 'categories-query'}});
+    });
+
 
     return {
       categories,

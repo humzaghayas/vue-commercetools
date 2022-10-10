@@ -87,7 +87,7 @@
         <div>&nbsp;</div>
         <div>&nbsp;</div>
           <a class="button" :href="'/addquote'">Add New Quote</a>
-      </div>
+        </div>
   </div>
 </template>
 <script>
