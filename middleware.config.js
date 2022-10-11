@@ -1,4 +1,6 @@
 const {categorySearch} =require( './categorySearch');
+const {isAdmin} =require( './isAdmin');
+const {getUpdatedQuotes} =require( './getUpdatedQuotes');
 const {customQueries} =require( './custom-queries');
 
 module.exports = {
@@ -10,7 +12,9 @@ module.exports = {
         {
           name: 'extension-name',
           extendApiMethods: {
-            async categorySearch(context, params) { return categorySearch(context,params); }
+            async categorySearch(context, params) { return categorySearch(context,params); },
+            async isAdmin(context, params) { return isAdmin(context,params); },
+            async getUpdatedQuotes(context,params){return {"humza":"humza"} }
           }
         }
       ],

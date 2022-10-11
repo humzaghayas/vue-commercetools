@@ -4,7 +4,7 @@
       </div>
     <div v-else>
       <SfTabs :open-tab="1">
-        <SfTab title="My quotes">
+        <SfTab title="Quotes For Approval">
           <div v-if="currentQuote">
             <SfButton class="sf-button--text all-orders" @click="currentQuote = null">All Quotes</SfButton>
             <div
@@ -19,8 +19,8 @@
                 {{errorMessage}}
               </div>
               <div>&nbsp;</div>
-              <div class="right" v-show="currentQuote.quoteState === 'initial' && showButtons">
-                <span class="small-button" @click.stop="updateQuoteStatus('submitted',currentQuote.id,currentQuote.version)" v-if="currentQuote.quoteState === 'initial'">
+              <div class="right" v-show="currentQuote.quoteState === 'submitted' && showButtons">
+                <span class="small-button" @click.stop="updateQuoteStatus('approved',currentQuote.id,currentQuote.version)" v-if="currentQuote.quoteState === 'submitted'">
                   Submit
                 </span>
                 <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
@@ -95,7 +95,6 @@
             <SfTable class="products">
               <SfTableHeading>
                 <SfTableHeader class="products__name">{{ $t('Product') }}</SfTableHeader>
-                <SfTableHeader>{{ $t('Employee Email') }}</SfTableHeader>
                 <SfTableHeader>{{ $t('Orignal Unit Price') }}</SfTableHeader>
                 <SfTableHeader>{{ $t('Unit Price') }}</SfTableHeader>
                 <SfTableHeader>{{ $t('Quantity') }}</SfTableHeader>
@@ -179,7 +178,6 @@
                 <SfTableData v-e2e="'quote-number'">{{ quote.quoteNumber}}</SfTableData>
                 <SfTableData v-e2e="'quote-state'">{{ quote.quoteState }}</SfTableData>
                 <SfTableData v-e2e="'quote-company-name'">{{ quote.company.name }}</SfTableData>
-                <!-- <SfTableData v-e2e="'quote-employee-email'">{{ quote.employeeEmail }}</SfTableData> -->
                 <SfTableData v-e2e="'quote-totalPrice'">
                   <p v-if="quote.totalPrice"> 
                       {{ quote.totalPrice.centAmount/100 }} - {{quote.totalPrice.currencyCode}}
@@ -247,62 +245,7 @@
     import { computed, ref } from '@nuxtjs/composition-api';
     import gql from 'graphql-tag'
     //import { useUser } from '@vue-storefront/commercetools';
-  
-      const ALL_QUOTES_QUERY = gql`
-      query GET_ALL_QUOTES{
-      quotes{
-          count
-          total
-          results{
-          id
-          version
-          employeeEmail
-          quoteState
-          quoteNumber
-          percentageDiscount
-          totalPrice{
-              centAmount,
-              currencyCode
-          }
-          company{
-              id,
-              name
-          }
-          lineItems{
-            quantity
-            price{
-              value{
-                currencyCode
-                centAmount
-              }
-            }
-            originalPrice{
-              centAmount
-              currencyCode
-            }
-            totalPrice{
-              centAmount
-              currencyCode
-            }
-            nameAllLocales{
-              locale
-              value
-            }
-            variant{
-              sku
-              price{
-                value{
-                  centAmount
-                  currencyCode
-                }
-              }
-            }
-          }
-          }
-      }
-      }
-      `;
-
+      
       const UPDATE_QUOTE_MUTATION = gql`
         mutation UPDATE_QUOTE_MUTATION($id:String!,$version:Long!,$actions:[QuoteUpdateAction!]!){
           updateQuote(id:$id,version:$version,actions:$actions){
@@ -369,12 +312,17 @@
           'Total Price'
           ];
 
+          let errorMessage='';
+          let successMessage='';
+
           // const { user, register, login, loading } = useUser();
             
           return {
           tableHeaders,
           currentQuote,
-          showButtons
+          showButtons,
+          successMessage,
+          errorMessage
         };
       },
       // apollo: {
@@ -385,7 +333,7 @@
       // },
       methods :{
 
-        updateQuoteStatus(status,id,ver) {
+        async updateQuoteStatus(status,id,ver) {
 
           this.errorMessage= ''
           this.successMessage= '';
@@ -407,19 +355,24 @@
 
           console.log(updateQuoteDraft);
           
-          this.$apollo.mutate({
+          await this.$apollo.mutate({
             mutation: UPDATE_QUOTE_MUTATION,
             variables: updateQuoteDraft
           }).then(res => {
 
             this.currentQuote = res.data.updateQuote;
-            this.successMessage= "Quote Submitted Successfully, Wait for Approval!";
+            this.successMessage= "Quote Accepted Successfully!";
           }).catch((res) => {
             this.errorMessage= "Error Submitting Quote!";
             this.showButtons = true;
           });;
 
           console.log('currentQuote 123: '+JSON.stringify(this.currentQuote));
+
+          // const res = await this.$vsf.$ct.api.getUpdatedQuotes({limit:10,offset:0,"quoteState": ["submitted"]});
+
+          // // this.quotes=res.data.quotes;
+          // console.log("Quotes:12:: "+ JSON.stringify(res));
 
           return false;
         }

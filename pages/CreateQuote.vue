@@ -3,9 +3,15 @@
       <div v-if="loading" class="loading">
         </div>
       <div v-else>
+        <div v-show="successMessage != ''" class="success-message">
+          {{successMessage}}
+        </div>
+        <div v-show="errorMessage != ''" class="error-message"> 
+          {{errorMessage}}
+        </div>
         <SfTabs :open-tab="1">
           <SfTab title="My quotes">
-            <div v-if="products">
+            <div v-if="products && products.length>0">
               <h3>Products</h3>
               <SfTable class="products">
                 <SfTableHeading>
@@ -72,10 +78,10 @@
               </SfTable>
               <div>&nbsp;</div>
               <div>&nbsp;</div>
-              <div v-if="!$apollo.loading" >
-                <a class="button" :href="'#'" @click="createQuote(employeeId,email,companyId,currency)">Submit Quote</a>currency :
+              <div v-if="!$apollo.loading" v-show="showButtons">
+                <a class="button" :href="'#'" @click="createQuote(employeeId,email,companyId,currency)">Submit Quote</a>
                 <span>&nbsp;&nbsp;</span>
-                <a class="button" :href="'#'">Cancel Quote</a>
+                <a class="button" :href="'#'" @click="cancelQuote()">Cancel Quote</a>
               </div>
             </div>
 
@@ -95,7 +101,7 @@
         SfLink,
         SfArrow
       } from '@storefront-ui/vue';
-      import { computed, ref } from '@nuxtjs/composition-api';
+      import { computed, ref, useRouter } from '@nuxtjs/composition-api';
       import gql from 'graphql-tag'
       import {  useCart, cartGetters, useUser, userGetters } from '@vue-storefront/commercetools';
       import { onSSR } from '@vue-storefront/core';
@@ -130,16 +136,29 @@
       export default  {
         name: 'QuotesList',
         props: ['quotes'],
+        middleware: [
+          'is-authenticated'
+        ],
+        data(){
+
+          return{
+            showButtons:true,
+            successMessage:"",
+            errorMessage:"",
+            showSuccessMessage:false,
+            showErrorMessage:false
+          }
+        },
         setup() {
           const currentQuote=ref(null);
-          const { cart ,load,loading} = useCart();
+          const { cart ,load,loading,clear} = useCart();
           const user = useUser();
-          let u = {};
+          const router = useRouter();
 
           onSSR(async () => {
                 await user.load();
                 await load();
-                });
+          });
 
           const currentEmail = userGetters.getEmailAddress(user.user.value);
           const customerNumber = user.user.value;
@@ -161,6 +180,8 @@
 
             if(products != null && products.value.length > 0){
               currencyCode = products.value[0].price.value.currencyCode;
+            }else{
+              router.push({path:"/"});
             }
   
             // const { user, register, login, loading } = useUser();
@@ -172,29 +193,19 @@
             currencyCode,
             loading,
             currentEmail,
-            customerNumber
-            // register,
-            // login,
-            // loading,
-            // firstName: user.value,
+            customerNumber,
+            clear
           };
         },
-        // apollo: {
-        //     quotes: {
-        //     query: ALL_QUOTES_QUERY,
-        //     prefetch: true,
-        //     },
-        // },
         methods :{
   
               createQuote (employeeId,employeeEmail,companyId,currency) {
-                  // let currency=this.currencyCode;
-                  // let employeeEmail=email;
-                  // let employeeId=customerNumber;
-                  // let companyId="9e7e7700-3f38-11ed-920a-5ffc1af93431";
+
+                this.successMessage='';
+                this.errorMessage='';
+                this.showButtons = false;
 
                   let lineItems = [];
-
                   console.log('prd : '+JSON.stringify(this.products));
 
                   for (var i=0 ;i < this.products.length ; i++) {
@@ -212,7 +223,6 @@
                     return false;
                   }
 
-
                   let createQuoteDraft = {"draft":{
                         currency,
                         employeeEmail,
@@ -222,24 +232,53 @@
                       }
                     } ;
 
+                  this.$vsf.$ct.api.deleteCart({id:this.cartId,version:this.cartVersion});
                   console.log(createQuoteDraft);
                   this.$apollo.mutate({
                     mutation: CREATE_QUOTE_MUTATION,
                     variables: createQuoteDraft
                   }).then(() => { 
-                    alert('Qoute Created!');
+                    this.successMessage= "Qoute Created Successfully!";
                   }).catch((res) => {
-                    alert('Error Occured!')
+                    alert('Error Occured!');
+                    this.errorMessage= "Error Creating Quote!";
+                    this.showButtons = true;
                   });
 
+                  
                   return false;
-                  }
+              },
+              cancelQuote(){
+                this.loading = true;
+                this.successMessage='';
+                this.errorMessage='';
+                this.showButtons = false;
+                // this.$vsf.$ct.api.deleteCart({id:this.cartId,version:this.cartVersion})
+                // .then(() => { 
+                //     this.successMessage= "Qoute Cancelled Successfully!";
+                //   }).catch((res) => {
+                //     this.errorMessage= "Error Creating Quote!";
+                //     this.showButtons = true;
+                //   });
+
+                this.$vsf.$ct.api.deleteCart({id:this.cartId,version:this.cartVersion}).then(()=>{
+                  window.location.reload();
+                });
+                
+                
+
+              }
         },
         async asyncData({ app, params ,loading,$vsf}) {
-
           const client = app.apolloProvider.defaultClient;
           const {data}= await $vsf.$ct.api.getMe({customer:true});
+
+          if(data.me.activeCart == null){
+            return;
+          }
           const email = data.me.customer.email;
+          const cartId = data.me.activeCart.id;
+          const cartVersion = data.me.activeCart.version;
           console.log("Data : "+ JSON.stringify(email));
 
           const res = await client.query({
@@ -263,7 +302,9 @@
             currency,
             employeeId,
             companyId,
-            email
+            email,
+            cartId,
+            cartVersion
           };
         },
         components: {
@@ -412,5 +453,14 @@
       background-color: #04AA6D;
     }
 
+    .success-message {
+      background-color: green;
+      color: white;
+    }
+
+    .error-message {
+      background-color: blue;
+      color: red;
+    }
       </style>
       

@@ -1,0 +1,22 @@
+{
+  "key" : "customer-custom-type",
+  "name" : {
+    "en" : "customer-custom-type"
+  },
+  "description" : {
+    "en" : "Customer Custom Type"
+  },
+  "resourceTypeIds" : [ "customer" ],
+  "fieldDefinitions" : [ {
+		"name" : "isAdmin",
+		"label" : {
+		  "en" : "Is Admin"
+		},
+		"required" : false,
+		"type" : {
+		  "name" : "Boolean"
+		},
+		"inputHint" : "SingleLine"
+	}
+  ]
+}
