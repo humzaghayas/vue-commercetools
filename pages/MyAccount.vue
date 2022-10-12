@@ -66,118 +66,7 @@ import {
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer.js';
 
-import gql from 'graphql-tag'
-    //import { useUser } from '@vue-storefront/commercetools';
-  
-      const ALL_QUOTES_QUERY = gql`
-      query GET_ALL_QUOTES ($limit:Int,$offset:Int,$employeeEmail:String){
-      quotes (limit:$limit,offset:$offset,employeeEmail:$employeeEmail){
-          count
-          total
-          results{
-          id
-          version
-          employeeEmail
-          quoteState
-          quoteNumber
-          percentageDiscount
-          totalPrice{
-              centAmount,
-              currencyCode
-          }
-          company{
-              id,
-              name
-          }
-          lineItems{
-            quantity
-            price{
-              value{
-                currencyCode
-                centAmount
-              }
-            }
-            originalPrice{
-              centAmount
-              currencyCode
-            }
-            totalPrice{
-              centAmount
-              currencyCode
-            }
-            nameAllLocales{
-              locale
-              value
-            }
-            variant{
-              sku
-              price{
-                value{
-                  centAmount
-                  currencyCode
-                }
-              }
-            }
-          }
-          }
-      }
-      }
-      `;
-
-      const GET_SUBMITTED_QUOTES = gql`
-      query GET_SUBMITTED_QUOTES ($limit:Int,$offset:Int,$quoteState:[String!]){
-      quotes (limit:$limit,offset:$offset,quoteState:$quoteState){
-          count
-          total
-          results{
-          id
-          version
-          employeeEmail
-          quoteState
-          quoteNumber
-          percentageDiscount
-          totalPrice{
-              centAmount,
-              currencyCode
-          }
-          company{
-              id,
-              name
-          }
-          lineItems{
-            quantity
-            price{
-              value{
-                currencyCode
-                centAmount
-              }
-            }
-            originalPrice{
-              centAmount
-              currencyCode
-            }
-            totalPrice{
-              centAmount
-              currencyCode
-            }
-            nameAllLocales{
-              locale
-              value
-            }
-            variant{
-              sku
-              price{
-                value{
-                  centAmount
-                  currencyCode
-                }
-              }
-            }
-          }
-          }
-      }
-      }
-      `;
+import {ALL_QUOTES_QUERY ,GET_SUBMITTED_QUOTES} from '../graphql/queries/quotesQueries'
 
 export default {
   name: 'MyAccount',
@@ -261,10 +150,7 @@ export default {
 
         const {data}= await $vsf.$ct.api.getMe({customer:true});
         const email = data.me.customer.email;
-        console.log("Data : "+ JSON.stringify(email));
 
-
-        const { quoteId } = params;
         const res = await client.query({
             query: ALL_QUOTES_QUERY,
             variables: {
@@ -272,11 +158,13 @@ export default {
               "offset": 0,
               "employeeEmail": email
             },
+            fetchPolicy:"no-cache" 
         });
         const { quotes } = res.data;
+        console.log('My Quotes :'+JSON.stringify(res));
+
 
         const {isAdmin}= await $vsf.$ct.api.isAdmin({email});
-        
         let adminQuotes=[];
 
         if(isAdmin){
@@ -287,8 +175,8 @@ export default {
                 "offset": 0,
                 "quoteState": ["submitted"]
               },
+              fetchPolicy:"no-cache" 
           });
-
           adminQuotes = resAdmin.data;
 
           console.log('Admin: '+JSON.stringify(resAdmin));

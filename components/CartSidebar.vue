@@ -99,14 +99,12 @@
             <div>&nbsp;</div>
             <div>&nbsp;</div>
 
-            <nuxt-link :to="'/createquote'">
-              <SfButton
+            <SfButton
                 class="sf-button--full-width color-secondary"
-                @click="toggleCartSidebar"
+                @click="validateLogin()"
               >
                 {{ $t('Create quote') }}
-              </SfButton>
-            </nuxt-link>
+            </SfButton>
           </div>
           <div v-else>
             <SfButton
@@ -132,8 +130,8 @@ import {
   SfImage,
   SfQuantitySelector
 } from '@storefront-ui/vue';
-import { computed } from '@nuxtjs/composition-api';
-import { useCart, cartGetters } from '@vue-storefront/commercetools';
+import { computed, useRouter } from '@nuxtjs/composition-api';
+import { useCart, cartGetters, useUser } from '@vue-storefront/commercetools';
 import { useUiState } from '~/composables';
 import debounce from 'lodash.debounce';
 
@@ -161,6 +159,20 @@ export default {
       await updateItemQty({ product, quantity });
     }, 500);
 
+    const { isAuthenticated } = useUser();
+    const { toggleLoginModal} = useUiState();
+    const router = useRouter();
+    const validateLogin = () =>{
+      toggleCartSidebar();
+      if (isAuthenticated.value) {
+        
+        return router.push({ path: '/createquote' });
+      }
+
+      toggleLoginModal();
+      return false;
+    }
+
     return {
       updateQuantity,
       loading,
@@ -170,7 +182,8 @@ export default {
       toggleCartSidebar,
       totals,
       totalItems,
-      cartGetters
+      cartGetters,
+      validateLogin 
     };
   }
 };

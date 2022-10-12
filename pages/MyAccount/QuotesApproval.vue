@@ -21,7 +21,7 @@
               <div>&nbsp;</div>
               <div class="right" v-show="currentQuote.quoteState === 'submitted' && showButtons">
                 <span class="small-button" @click.stop="updateQuoteStatus('approved',currentQuote.id,currentQuote.version)" v-if="currentQuote.quoteState === 'submitted'">
-                  Submit
+                  Approve
                 </span>
                 <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 <span class="small-button" @click.stop="updateQuoteStatus('declined',currentQuote.id,currentQuote.version)">Decline</span>
@@ -163,7 +163,7 @@
 
                       
             <div v-if="quotes.results.length === 0" class="no-orders">
-              <p class="no-orders__title">{{ $t('You currently have no orders') }}</p>
+              <p class="no-orders__title">{{ $t('There are no quotes for approval.') }}</p>
               <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton>
             </div>
             <SfTable v-else class="orders">
@@ -243,59 +243,7 @@
       SfArrow
     } from '@storefront-ui/vue';
     import { computed, ref } from '@nuxtjs/composition-api';
-    import gql from 'graphql-tag'
-    //import { useUser } from '@vue-storefront/commercetools';
-      
-      const UPDATE_QUOTE_MUTATION = gql`
-        mutation UPDATE_QUOTE_MUTATION($id:String!,$version:Long!,$actions:[QuoteUpdateAction!]!){
-          updateQuote(id:$id,version:$version,actions:$actions){
-            id
-            version
-            employeeEmail
-            quoteState
-            quoteNumber
-            percentageDiscount
-            totalPrice{
-                centAmount,
-                currencyCode
-            }
-            company{
-                id,
-                name
-            }
-            lineItems{
-              quantity
-              price{
-                value{
-                  currencyCode
-                  centAmount
-                }
-              }
-              originalPrice{
-                centAmount
-                currencyCode
-              }
-              totalPrice{
-                centAmount
-                currencyCode
-              }
-              nameAllLocales{
-                locale
-                value
-              }
-              variant{
-                sku
-                price{
-                  value{
-                    centAmount
-                    currencyCode
-                  }
-                }
-              }
-            }
-          }
-        }
-        `;
+    import {UPDATE_QUOTE_MUTATION,GET_SUBMITTED_QUOTES} from '../../graphql/queries/quotesQueries'
     
     export default  {
       name: 'QuotesList',
@@ -333,6 +281,21 @@
       // },
       methods :{
 
+        async getAllQuotes(){
+          this.currentQuote = null;
+          const resAdmin = await this.$apollo.query({
+              query: GET_SUBMITTED_QUOTES,
+              variables: {
+                "limit": 10,
+                "offset": 0,
+                "quoteState": ["submitted"]
+              },
+              fetchPolicy:"no-cache" 
+          });
+
+          this.quotes = resAdmin.data.quotes;
+        },
+
         async updateQuoteStatus(status,id,ver) {
 
           this.errorMessage= ''
@@ -369,11 +332,17 @@
 
           console.log('currentQuote 123: '+JSON.stringify(this.currentQuote));
 
-          // const res = await this.$vsf.$ct.api.getUpdatedQuotes({limit:10,offset:0,"quoteState": ["submitted"]});
+          // const resAdmin = await this.$apollo.query({
+          //     query: GET_SUBMITTED_QUOTES,
+          //     variables: {
+          //       "limit": 10,
+          //       "offset": 0,
+          //       "quoteState": ["submitted"]
+          //     },
+          // });
 
-          // // this.quotes=res.data.quotes;
-          // console.log("Quotes:12:: "+ JSON.stringify(res));
-
+          // this.quotes = resAdmin.data.quotes;
+          await this.getAllQuotes();
           return false;
         }
       },

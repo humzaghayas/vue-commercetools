@@ -164,7 +164,7 @@
 
                       
             <div v-if="quotes.results.length === 0" class="no-orders">
-              <p class="no-orders__title">{{ $t('You currently have no orders') }}</p>
+              <p class="no-orders__title">{{ $t('You currently have no quotes') }}</p>
               <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton>
             </div>
             <SfTable v-else class="orders">
@@ -245,114 +245,11 @@
       SfArrow
     } from '@storefront-ui/vue';
     import { computed, ref } from '@nuxtjs/composition-api';
-    import gql from 'graphql-tag'
+    import {UPDATE_QUOTE_MUTATION,ALL_QUOTES_QUERY} from '../../graphql/queries/quotesQueries'
     //import { useUser } from '@vue-storefront/commercetools';
   
-      const ALL_QUOTES_QUERY = gql`
-      query GET_ALL_QUOTES{
-      quotes{
-          count
-          total
-          results{
-          id
-          version
-          employeeEmail
-          quoteState
-          quoteNumber
-          percentageDiscount
-          totalPrice{
-              centAmount,
-              currencyCode
-          }
-          company{
-              id,
-              name
-          }
-          lineItems{
-            quantity
-            price{
-              value{
-                currencyCode
-                centAmount
-              }
-            }
-            originalPrice{
-              centAmount
-              currencyCode
-            }
-            totalPrice{
-              centAmount
-              currencyCode
-            }
-            nameAllLocales{
-              locale
-              value
-            }
-            variant{
-              sku
-              price{
-                value{
-                  centAmount
-                  currencyCode
-                }
-              }
-            }
-          }
-          }
-      }
-      }
-      `;
 
-      const UPDATE_QUOTE_MUTATION = gql`
-        mutation UPDATE_QUOTE_MUTATION($id:String!,$version:Long!,$actions:[QuoteUpdateAction!]!){
-          updateQuote(id:$id,version:$version,actions:$actions){
-            id
-            version
-            employeeEmail
-            quoteState
-            quoteNumber
-            percentageDiscount
-            totalPrice{
-                centAmount,
-                currencyCode
-            }
-            company{
-                id,
-                name
-            }
-            lineItems{
-              quantity
-              price{
-                value{
-                  currencyCode
-                  centAmount
-                }
-              }
-              originalPrice{
-                centAmount
-                currencyCode
-              }
-              totalPrice{
-                centAmount
-                currencyCode
-              }
-              nameAllLocales{
-                locale
-                value
-              }
-              variant{
-                sku
-                price{
-                  value{
-                    centAmount
-                    currencyCode
-                  }
-                }
-              }
-            }
-          }
-        }
-        `;
+
     
     export default  {
       name: 'QuotesList',
@@ -369,23 +266,23 @@
           'Total Price'
           ];
 
+          let errorMessage= ''
+          let successMessage= '';
+
+
           // const { user, register, login, loading } = useUser();
             
           return {
           tableHeaders,
           currentQuote,
-          showButtons
+          showButtons,
+          errorMessage,
+          successMessage
         };
       },
-      // apollo: {
-      //     quotes: {
-      //     query: ALL_QUOTES_QUERY,
-      //     prefetch: true,
-      //     },
-      // },
       methods :{
 
-        updateQuoteStatus(status,id,ver) {
+        async updateQuoteStatus(status,id,ver) {
 
           this.errorMessage= ''
           this.successMessage= '';
@@ -406,20 +303,32 @@
           } ;
 
           console.log(updateQuoteDraft);
-          
-          this.$apollo.mutate({
-            mutation: UPDATE_QUOTE_MUTATION,
-            variables: updateQuoteDraft
-          }).then(res => {
 
+          await this.$apollo.mutate({
+            mutation: UPDATE_QUOTE_MUTATION,
+            variables: updateQuoteDraft,
+          },).then(res => {
             this.currentQuote = res.data.updateQuote;
             this.successMessage= "Quote Submitted Successfully, Wait for Approval!";
           }).catch((res) => {
             this.errorMessage= "Error Submitting Quote!";
             this.showButtons = true;
-          });;
+          });
 
-          console.log('currentQuote 123: '+JSON.stringify(this.currentQuote));
+          const {data}=await this.$vsf.$ct.api.getMe({customer:true});
+          const email = data.me.customer.email;
+          console.log("Data : "+ JSON.stringify(email));
+          const res=await this.$apollo.query({ query: ALL_QUOTES_QUERY,
+                      variables: {
+                        "limit": 10,
+                        "offset": 0,
+                        "employeeEmail": email
+                      },
+                      fetchPolicy:"no-cache" });
+
+          this.quotes = res.data.quotes;
+
+          console.log('My Quotes :'+JSON.stringify(res));
 
           return false;
         }
