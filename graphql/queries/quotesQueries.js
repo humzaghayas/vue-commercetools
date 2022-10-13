@@ -159,3 +159,82 @@ mutation UPDATE_QUOTE_MUTATION($id:String!,$version:Long!,$actions:[QuoteUpdateA
   }
 }
 `;
+
+
+export const CREATE_QUOTE_MUTATION = gql`
+mutation CREATE_QUOTE_MUTATION($draft:CreateQuoteDraft!){
+  createQuote(draft:$draft){
+    id
+    employeeId
+    employeeEmail
+  }
+}
+`;
+
+export const GET_EMPLOYEE_DETAIL_QUERY=gql`
+query($where:String){
+    employees(where:$where){
+      offset
+      results{
+        employeeNumber
+        email
+        id
+        companyName
+        customerGroup{
+          key
+        }
+      }
+    }
+  }
+`
+
+
+export const GET_QUOTE_BY_ID = gql`query($id:String!){
+	quote(id:$id){
+		id
+		version
+		employeeEmail
+		quoteState
+		quoteNumber
+		percentageDiscount
+		totalPrice{
+			centAmount,
+			currencyCode
+		}
+		company{
+			id,
+			name
+		}
+		lineItems{
+			quantity
+			price{
+				value{
+				currencyCode
+				centAmount
+				}
+			}
+			originalPrice{
+				centAmount
+				currencyCode
+			}
+			totalPrice{
+				centAmount
+				currencyCode
+			}
+			nameAllLocales{
+				locale
+				value
+			}
+			variant{
+				sku
+				price{
+				value{
+					centAmount
+					currencyCode
+					}
+				}
+			}
+		}
+	}
+}
+`

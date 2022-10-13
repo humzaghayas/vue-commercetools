@@ -82,6 +82,8 @@
                 <a class="button" :href="'#'" @click="createQuote(employeeId,email,companyId,currency)">Submit Quote</a>
                 <span>&nbsp;&nbsp;</span>
                 <a class="button" :href="'#'" @click="cancelQuote()">Cancel Quote</a>
+                <span>&nbsp;&nbsp;</span>
+                <a class="button" :href="'#'" @click="clearCart()">Clear Cart</a>
               </div>
             </div>
 
@@ -102,36 +104,12 @@
         SfArrow
       } from '@storefront-ui/vue';
       import { computed, ref, useRouter } from '@nuxtjs/composition-api';
-      import gql from 'graphql-tag'
       import {  useCart, cartGetters, useUser, userGetters } from '@vue-storefront/commercetools';
       import { onSSR } from '@vue-storefront/core';
-      //import { useUser } from '@vue-storefront/commercetools';
+      import { useUiState } from '~/composables';
+      import { CREATE_QUOTE_MUTATION ,GET_EMPLOYEE_DETAIL_QUERY} from '../graphql/queries/quotesQueries';
     
-      const CREATE_QUOTE_MUTATION = gql`
-          mutation CREATE_QUOTE_MUTATION($draft:CreateQuoteDraft!){
-            createQuote(draft:$draft){
-              employeeId
-              employeeEmail
-            }
-          }
-          `;
 
-          const GET_EMPLOYEE_DETAIL_QUERY=gql`
-          query($where:String){
-              employees(where:$where){
-                offset
-                results{
-                  employeeNumber
-                  email
-                  id
-                  companyName
-                  customerGroup{
-                    key
-                  }
-                }
-              }
-            }
-          `
       
       export default  {
         name: 'QuotesList',
@@ -151,14 +129,18 @@
         },
         setup() {
           const currentQuote=ref(null);
-          const { cart ,load,loading,clear} = useCart();
+          const { cart ,load,loading,clear,addItem,removeItem} = useCart();
           const user = useUser();
           const router = useRouter();
+          const { toggleCartSidebar} = useUiState();
 
           onSSR(async () => {
                 await user.load();
                 await load();
           });
+
+
+          console.log("cart Me: "+ JSON.stringify(cart.value));
 
           const currentEmail = userGetters.getEmailAddress(user.user.value);
           const customerNumber = user.user.value;
@@ -183,6 +165,18 @@
             }else{
               router.push({path:"/"});
             }
+
+            console.log("Product::: "+JSON.stringify(products));
+            const clearCart = () =>{
+
+              for (let i=0 ; i<products.value.length ; i++){
+                removeItem({
+                  product: {
+                    id: products.value[i].id,
+                  },
+                });
+            }
+          }
   
             // const { user, register, login, loading } = useUser();
               
@@ -194,20 +188,21 @@
             loading,
             currentEmail,
             customerNumber,
-            clear
+            clear,
+            toggleCartSidebar,
+            load,
+            clearCart
           };
         },
         methods :{
   
-              createQuote (employeeId,employeeEmail,companyId,currency) {
+              async createQuote (employeeId,employeeEmail,companyId,currency) {
 
                 this.successMessage='';
                 this.errorMessage='';
                 this.showButtons = false;
 
                   let lineItems = [];
-                  console.log('prd : '+JSON.stringify(this.products));
-
                   for (var i=0 ;i < this.products.length ; i++) {
 
                     var prd= this.products[i];
@@ -232,20 +227,31 @@
                       }
                     } ;
 
-                  this.$vsf.$ct.api.deleteCart({id:this.cartId,version:this.cartVersion});
-                  console.log(createQuoteDraft);
-                  this.$apollo.mutate({
+                  let quoteId =null;
+                  await this.$apollo.mutate({
                     mutation: CREATE_QUOTE_MUTATION,
                     variables: createQuoteDraft
-                  }).then(() => { 
+                  }).then(res => { 
                     this.successMessage= "Qoute Created Successfully!";
+
+                    console.log("rs:: "+JSON.stringify(res));
+                    quoteId=res.data.createQuote.id;
                   }).catch((res) => {
                     alert('Error Occured!');
                     this.errorMessage= "Error Creating Quote!";
                     this.showButtons = true;
                   });
 
-                  
+                  let createQuoteDraftCustom = {
+                        currency,
+                        customerEmail:employeeEmail,
+                    } ;
+
+                  await this.clearCart();
+
+                  console.log("T :: "+JSON.stringify(quoteId));
+
+                  this.$router.push({path:'/q/'+quoteId});
                   return false;
               },
               cancelQuote(){
@@ -253,20 +259,7 @@
                 this.successMessage='';
                 this.errorMessage='';
                 this.showButtons = false;
-                // this.$vsf.$ct.api.deleteCart({id:this.cartId,version:this.cartVersion})
-                // .then(() => { 
-                //     this.successMessage= "Qoute Cancelled Successfully!";
-                //   }).catch((res) => {
-                //     this.errorMessage= "Error Creating Quote!";
-                //     this.showButtons = true;
-                //   });
-
-                this.$vsf.$ct.api.deleteCart({id:this.cartId,version:this.cartVersion}).then(()=>{
-                  window.location.reload();
-                });
-                
-                
-
+                this.clearCart();
               }
         },
         async asyncData({ app, params ,loading,$vsf}) {

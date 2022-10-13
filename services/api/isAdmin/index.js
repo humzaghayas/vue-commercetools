@@ -15,21 +15,18 @@ const isAdmin = async (context, params, customQuery) => {
       fetchPolicy: 'no-cache'
     });
 
+    let value=false;
 
     if(request.data.customers.results != null && request.data.customers.results.length > 0){
-        if(request.data.customers.results[0].custom.customFieldsRaw){
-
-            for(var i=0 ; i< request.data.customers.results[0].custom.customFieldsRaw.length; i++){
-                var c = request.data.customers.results[0].custom.customFieldsRaw[i];
-
-                if(c.name === 'isAdmin'){
-                    return {"isAdmin":c.value};
-                }
+        if(request.data.customers.results[0].custom){
+            var cFields = request.data.customers.results[0].custom.customFieldsRaw.find(cf =>(cf.name === 'roles'));
+            if( cFields ){//  c.name === 'roles'){
+                value = cFields.value.includes("b2b-company-admin");
             }
         }
     }
   
-    return {"isAdmin":false};
+    return {"isAdmin":value};
 }
 
 module.exports ={isAdmin};

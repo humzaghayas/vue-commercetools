@@ -1,358 +1,341 @@
 <template>
-  <div>
-    <div v-if="$apollo.loading" class="loading">
-      </div>
-    <div v-else>
-      <h1>Quotes Summary</h1>
-
-      <div class="right" v-if="quote.quoteState === 'initial' || quote.quoteState === 'submitted'">
-        <span class="handMouseOver" @click="updateQuoteStatus('submitted',quote.id,quote.version)" v-if="quote.quoteState === 'initial'">
-          Submit
-        </span>
-        <span class="handMouseOver" @click="updateQuoteStatus('approved',quote.id,quote.version)" v-else-if="quote.quoteState === 'submitted'">
-          Activate
-        </span>
-        <span>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-        <span class="handMouseOver" @click="updateQuoteStatus('declined',quote.id,quote.version)">Decline</span>
-      </div>
-    
-    <div>&nbsp;</div>
-    <a :href="'/quotes'">Back To Quotes</a>
-    <div>&nbsp;</div>
-    <table style="width:500px">
-        <tr>
-          <td valign="top">
-              <div>
-                 <h5>State</h5>
-                  {{quote.quoteState}}
-              </div>
-        </td>
-        <td valign="top">
-          <div>
-              <table>
+    <div >
+      <div v-if="$apollo.loading" class="loading">
+        </div>
+      <div v-else>
+            <div v-if="quote">
+            <h3>Quote Summary</h3>
+              <table style="width:500px">
                 <tr>
-                  <td><h5>Original Total</h5></td>
-                  <td style="margin-left:10px;">
-                    <p v-if="quote.totalPrice"> 
-                      ${{quote.totalPrice.centAmount/100}}
-                    </p>
-                    <p v-else>
-                      $0
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><h5>Discount</h5></td>
-                  <td style="margin-left:10px;">
-                    <p v-if="quote.amountDiscount"> 
-                      {{quote.amountDiscount.centAmount/100}}
-                    </p>
-                    <p v-else>
-                      $0
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="line"><h5>Fianl Total</h5></td>
-                  <td style="margin-left:10px;"> 
-                    <p v-if="quote.totalPrice"> 
-                      ${{quote.totalPrice.centAmount/100}}
-                    </p>
-                    <p v-else>
-                      $0
-                    </p>
+                  <td valign="top">
+                      <div>
+                        <h5>State</h5>
+                          {{quote.quoteState}}
+                      </div>
+                </td>
+                <td valign="top">
+                  <div>
+                      <table>
+                        <tr>
+                          <td><h5>Original Total</h5></td>
+                          <td style="margin-left:10px;">
+                            <p v-if="quote.totalPrice"> 
+                              ${{quote.totalPrice.centAmount/100}}
+                            </p>
+                            <p v-else>
+                              $0
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td><h5>Discount</h5></td>
+                          <td style="margin-left:10px;">
+                            <p v-if="quote.amountDiscount"> 
+                              {{quote.amountDiscount.centAmount/100}}
+                            </p>
+                            <p v-else>
+                              $0
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="line"><h5>Fianl Total</h5></td>
+                          <td style="margin-left:10px;"> 
+                            <p v-if="quote.totalPrice"> 
+                              ${{quote.totalPrice.centAmount/100}}
+                            </p>
+                            <p v-else>
+                              $0
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                  </div>
                   </td>
                 </tr>
               </table>
           </div>
-          </td>
-  </tr>
-  </table>
+            <div>
+              <h3>Employee</h3>
+              <SfProperty
+                name="Employee Email"
+                :value="quote.employeeEmail"
+                class="sf-property--full-width property"
+              />
+            <SfProperty
+                name="Company Name"
+                :value="quote.company.name"
+                class="sf-property--full-width property"
+              />
+            </div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+              <SfTable class="quote">
+                <SfTableHeading>
+                  <SfTableHeader class="products__name">{{ $t('Product') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Orignal Unit Price') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Unit Price') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Quantity') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Subtotal') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Tax') }}</SfTableHeader>
+                  <SfTableHeader>{{ $t('Total') }}</SfTableHeader>
+                </SfTableHeading>
+                <SfTableRow v-for="(item, i) in quote.lineItems" :key="i">
+                  <SfTableData class="products__name">
+                    <p v-for="name in item.nameAllLocales" :key="name.locale" v-show="name.locale === 'en'">
+                        {{name.value}}
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.price"> 
+                        ${{item.price.value.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.price"> 
+                        ${{item.price.value.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.quantity"> 
+                      {{item.quantity}}
+                    </p>
+                    <p v-else>
+                      0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>
+                    <p v-if="item.totalPrice"> 
+                        ${{item.totalPrice.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                  <SfTableData>0</SfTableData>
+                  <SfTableData>
+  
+                    <p v-if="item.totalPrice"> 
+                        ${{item.totalPrice.centAmount/100}}
+                    </p>
+                    <p v-else>
+                      $0
+                    </p>
+                  </SfTableData>
+                </SfTableRow>
+              </SfTable>
 
-  <div>
-    <h5>Employee</h5>
-    <div>
-      <p>
-        Employee Email: {{quote.employeeEmail}}
-      </p>
-      <p>
-        Company Name: {{quote.company.name}}
-      </p>
-    </div>
-  </div>
-  <div>&nbsp;</div>
-  <table width="100%">
-    <tr>
-      <th width="20%">Prodct</th>
-      <th width="10%">Orignal Unit Price</th>
-      <th width="20%">Unit Price</th>
-      <th width="10%">Qty</th>
-      <th width="10%">Subtotal</th>
-      <th width="10%">Tax</th>
-      <th width="10%">Total</th>
-      <th width="10%">Actions</th>
-    </tr>
-    <tr v-for="prd in quote.lineItems" :key="prd.variant.sku" >
-      <td width="20%" style="text-align: center;">
-        <p v-for="name in prd.nameAllLocales" :key="name.locale" v-show="name.locale === 'en'">
-            {{name.value}}
-        </p>
-      </td>
-      <td width="10%" style="text-align: center;">
-        <p v-if="prd.price"> 
-            ${{prd.price.value.centAmount/100}}
-        </p>
-        <p v-else>
-           $0
-        </p>
-      </td>
-      <td width="20%" style="text-align: center;">
-        <p v-if="prd.price"> 
-            ${{prd.price.value.centAmount/100}}
-        </p>
-        <p v-else>
-           $0
-        </p>
-      </td>
-      <td width="10%" style="text-align: center;">
-        <p v-if="prd.quantity"> 
-            {{prd.quantity}}
-        </p>
-        <p v-else>
-           0
-        </p>
-
-      </td>
-      <td width="10%" style="text-align: center;">
-        <p v-if="prd.totalPrice"> 
-            ${{prd.totalPrice.centAmount/100}}
-        </p>
-        <p v-else>
-           $0
-        </p>
-      </td>
-      <td width="10%" style="text-align: center;">$0</td>
-      <td width="10%" style="text-align: center;">
-
-        <p v-if="prd.totalPrice"> 
-            ${{prd.totalPrice.centAmount/100}}
-        </p>
-        <p v-else>
-           $0
-        </p>
-      </td>
-      <td width="10%" style="text-align: center;"></td>
-    </tr>
-  </table>
-
-</div>
-  </div>
-</template>
-<script>
-
-import gql from 'graphql-tag'
-import SfAccordion from '@storefront-ui/vue/src/components/organisms/SfAccordion/SfAccordion.vue';
-
-const UPDATE_QUOTE_MUTATION = gql`
-  mutation UPDATE_QUOTE_MUTATION($id:String!,$version:Long!,$actions:[QuoteUpdateAction!]!){
-    updateQuote(id:$id,version:$version,actions:$actions){
-      id
-      version
-      employeeEmail
-    }
-  }
-  `;
-
-const QUOTE_BY_ID_QUERY = gql`
-query QUOTE_BY_ID_QUERY($id:String!){
-  quote(id:$id){
-    id
-    version
-    employeeEmail
-    company{
-      name
-    }
-    quoteState
-    quoteNumber
+            </div>
+      </div>
+      </template>
+      
+      <script>
+      import {
+        SfTabs,
+        SfTable,
+        SfButton,
+        SfProperty,
+        SfLink,
+        SfArrow
+      } from '@storefront-ui/vue';
+      // import { computed, ref, useRouter } from '@nuxtjs/composition-api';
+      // import {  useCart, cartGetters, useUser, userGetters } from '@vue-storefront/commercetools';
+      // import { onSSR } from '@vue-storefront/core';
+      // import { useUiState } from '~/composables';
+      import { GET_QUOTE_BY_ID } from '../../graphql/queries/quotesQueries';
     
-    amountDiscount{
-      currencyCode
-      currencyCode
-    }
-    percentageDiscount
-    
-    originalTotalPrice{
-      currencyCode
-      centAmount
-    }
-    
-    totalPrice{
-      currencyCode
-      centAmount
-    }
-    
-    lineItems{
-      quantity
-      price{
-        value{
-          currencyCode
-          centAmount
+
+      
+      export default  {
+        name: 'QuotesSummary',
+        middleware: [
+          'is-authenticated'
+        ],
+        // data(){
+
+        //   return{
+        //     showButtons:true,
+        //     successMessage:"",
+        //     errorMessage:"",
+        //     showSuccessMessage:false,
+        //     showErrorMessage:false
+        //   }
+        // },
+        async asyncData({ app, params ,loading,$vsf}) {
+          const client = app.apolloProvider.defaultClient;
+          console.log("Context:: "+JSON.stringify(params));
+
+          const {quoteId} = params;
+
+         const quote = await client.query({
+            query: GET_QUOTE_BY_ID,
+            variables: {id:quoteId}
+          })
+
+          return {
+            quote:quote.data.quote
+          };
+        },
+        components: {
+          SfTabs,
+          SfTable,
+          SfButton,
+          SfProperty,
+          SfLink,
+          SfArrow
         }
+      };
+      </script>
+      
+      <style lang='scss' scoped>
+      .pagination {
+        padding-top: var(--spacer-base);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      originalPrice{
-        centAmount
-        currencyCode
+      .pagination-count {
+        padding: 0 var(--spacer-base);
       }
-      totalPrice{
-        centAmount
-        currencyCode
-      }
-      nameAllLocales{
-        locale
-        value
-      }
-      variant{
-        sku
-        price{
-          value{
-            centAmount
-            currencyCode
+      .no-orders {
+        &__title {
+          margin: 0 0 var(--spacer-lg) 0;
+          font: var(--font-weight--normal) var(--font-size--base) / 1.6 var(--font-family--primary);
+        }
+        &__button {
+          --button-width: 100%;
+          @include for-desktop {
+            --button-width: 17,5rem;
           }
         }
       }
-    }
-  }
-}
-`;
-
-export default {
-    async asyncData({ app, params ,loading}) {
-        const client = app.apolloProvider.defaultClient;
-        const { quoteId } = params;
-        const res = await client.query({
-            query: QUOTE_BY_ID_QUERY,
-            variables: {
-                id: quoteId
-            },
-        });
-        const { quote } = res.data;
-        return {
-            quote,
-        };
-    },
-    methods :{
-
-      updateQuoteStatus(status,id,ver) {
-
-        const version = Number(ver);
-        
-        const actions = [
-          {
-            changeState :{
-              state:status
+      .orders {
+        @include for-desktop {
+          &__element {
+            &--right {
+              --table-column-flex: 1;
+              text-align: right;
             }
           }
-        ];
-
-        let updateQuoteDraft = {
-          id,
-          version,
-          actions
-        } ;
-
-        console.log(updateQuoteDraft);
-        
-        this.$apollo.mutate({
-          mutation: UPDATE_QUOTE_MUTATION,
-          variables: updateQuoteDraft
-        }).then(() => { 
-          window.location.reload();
-         }).catch((res) => {
-          alert('Error Occured!')
-        });
-
-        return false;
-
-       }
-    },
-    components: { SfAccordion }
-}
-  </script>
-
-<style scoped>
-
-.rheight{
-  height: 20px;
-}
-  .line{
-    border-top: 5px solid black;
-  }
-  .left {
-    float: left;
-    width: 200px;
-    margin: auto;
-    border: 3px solid gray;
-  }
-
-  h5 {
-    margin-top: 2px;
-    margin-bottom: 2px;
-  }
-
-  p {
-    margin-top: 0px;
-    margin-bottom: 0px;
-  }
-  .right {
-    display: block;
-    float: right;
-    width: 150px;
-    border: 3px solid gray;
-  }
-  li {
-    margin-bottom: 0.5rem;
-  }
-  li:first-letter {
-    text-transform: uppercase;
-  }
-  .loading {
-    display: inline-block;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 4px solid rgba(9, 133, 81, 0.705);
-    border-radius: 50%;
-    border-top-color: #158876;
-    animation: spin 1s ease-in-out infinite;
-  }
-  @keyframes spin {
-    to {
-      -webkit-transform: rotate(360deg);
+        }
+      }
+      .all-orders {
+        --button-padding: var(--spacer-base) 0;
+      }
+      .message {
+        margin: 0 0 var(--spacer-xl) 0;
+        font: var(--font-weight--light) var(--font-size--base) / 1.6 var(--font-family--primary);
+        &__link {
+          color: var(--c-primary);
+          font-weight: var(--font-weight--medium);
+          font-family: var(--font-family--primary);
+          font-size: var(--font-size--base);
+          text-decoration: none;
+          &:hover {
+            color: var(--c-text);
+          }
+        }
+      }
+      .product {
+        &__properties {
+          margin: var(--spacer-xl) 0 0 0;
+        }
+        &__property,
+        &__action {
+          font-size: var(--font-size--sm);
+        }
+        &__action {
+          color: var(--c-gray-variant);
+          font-size: var(--font-size--sm);
+          margin: 0 0 var(--spacer-sm) 0;
+          &:last-child {
+            margin: 0;
+          }
+        }
+        &__qty {
+          color: var(--c-text);
+        }
+      }
+      .products {
+        --table-column-flex: 1;
+        &__name {
+          margin-right: var(--spacer-sm);
+          @include for-desktop {
+            --table-column-flex: 2;
+          }
+        }
+      }
+      .highlighted {
+        box-sizing: border-box;
+        width: 100%;
+        background-color: var(--c-light);
+        padding: var(--spacer-sm);
+        --property-value-font-size: var(--font-size--base);
+        --property-name-font-size: var(--font-size--base);
+        &:last-child {
+          margin-bottom: 0;
+        }
+        ::v-deep .sf-property__name {
+          white-space: nowrap;
+        }
+        ::v-deep .sf-property__value {
+          text-align: right;
+        }
+        &--total {
+          margin-bottom: var(--spacer-sm);
+        }
+        @include for-desktop {
+          padding: var(--spacer-xl);
+          --property-name-font-size: var(--font-size--lg);
+          --property-name-font-weight: var(--font-weight--medium);
+          --property-value-font-size: var(--font-size--lg);
+          --property-value-font-weight: var(--font-weight--semibold);
+        }
+      }
+  
+      h3,h5,p {
+        margin-top: 2px;
+        margin-bottom: 2px;
+      }
+      .handMouseOver {
+       cursor: pointer; 
+      }
+      .right {
+      display: block;
+      float: right;
+      width: 150px;
+      border: 3px solid gray;
     }
-  }
 
-  .handMouseOver {
-     cursor: pointer; 
+    .button {
+      border: 2px solid #04AA6D;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin-left: 20px;
+      color: blue;
     }
 
-    .loading {
-  display: inline-block;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 4px solid rgba(9, 133, 81, 0.705);
-  border-radius: 50%;
-  border-top-color: #158876;
-  animation: spin 1s ease-in-out infinite;
-}
+    .button:hover  {
+      background-color: #04AA6D;
+    }
 
-a:link {
-    color: blue;
-  }
+    .success-message {
+      background-color: green;
+      color: white;
+    }
 
-  a:visited {
-    color: blue;
-  }
-
-  a:hover  {
-    color: red;
-  }
-  </style>
+    .error-message {
+      background-color: blue;
+      color: red;
+    }
+      </style>
+      

@@ -189,7 +189,7 @@
                   </p>
                 </SfTableData>
                 <SfTableData class="orders__view orders__element--right">
-                  <SfButton class="sf-button--text desktop-only" @click="currentQuote = quote">
+                  <SfButton class="sf-button--text desktop-only" @click="currentQuote = quote;successMessage='';errorMessage='';showButtons=true;">
                     {{ $t('View details') }}
                   </SfButton>
                 </SfTableData>
@@ -308,7 +308,7 @@
             mutation: UPDATE_QUOTE_MUTATION,
             variables: updateQuoteDraft,
           },).then(res => {
-            this.currentQuote = res.data.updateQuote;
+            // this.currentQuote = res.data.updateQuote;
             this.successMessage= "Quote Submitted Successfully, Wait for Approval!";
           }).catch((res) => {
             this.errorMessage= "Error Submitting Quote!";

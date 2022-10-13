@@ -167,6 +167,8 @@ export default {
         const {isAdmin}= await $vsf.$ct.api.isAdmin({email});
         let adminQuotes=[];
 
+        console.log("IS ADMIN :: "+JSON.stringify(isAdmin));
+
         if(isAdmin){
           const resAdmin = await client.query({
               query: GET_SUBMITTED_QUOTES,
