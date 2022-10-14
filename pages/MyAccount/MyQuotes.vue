@@ -1,6 +1,7 @@
 <template>
   <div >
-    <div v-if="$apollo.loading" class="loading">
+    <div v-if="$apollo.queries.quotes.loading" class="loading">
+      
       </div>
     <div v-else>
       <SfTabs :open-tab="1">
@@ -162,7 +163,6 @@
               {{ $t('Details and status orders') }}
             </p>
 
-                      
             <div v-if="quotes.results.length === 0" class="no-orders">
               <p class="no-orders__title">{{ $t('You currently have no quotes') }}</p>
               <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton>
@@ -179,7 +179,6 @@
                 <SfTableData v-e2e="'quote-number'">{{ quote.quoteNumber}}</SfTableData>
                 <SfTableData v-e2e="'quote-state'">{{ quote.quoteState }}</SfTableData>
                 <SfTableData v-e2e="'quote-company-name'">{{ quote.company.name }}</SfTableData>
-                <!-- <SfTableData v-e2e="'quote-employee-email'">{{ quote.employeeEmail }}</SfTableData> -->
                 <SfTableData v-e2e="'quote-totalPrice'">
                   <p v-if="quote.totalPrice"> 
                       {{ quote.totalPrice.centAmount/100 }} - {{quote.totalPrice.currencyCode}}
@@ -194,7 +193,7 @@
                   </SfButton>
                 </SfTableData>
               </SfTableRow>
-            </SfTable>
+            </SfTable> 
             <!-- <div
               v-e2e="'order-history-pagination'"
               class="pagination"
@@ -244,20 +243,26 @@
       SfLink,
       SfArrow
     } from '@storefront-ui/vue';
-    import { computed, ref } from '@nuxtjs/composition-api';
+    import { computed, ref, useContext } from '@nuxtjs/composition-api';
     import {UPDATE_QUOTE_MUTATION,ALL_QUOTES_QUERY} from '../../graphql/queries/quotesQueries'
+import { onSSR, useVSFContext, vsfRef } from '@vue-storefront/core';
     //import { useUser } from '@vue-storefront/commercetools';
-  
 
 
     
     export default  {
       name: 'QuotesList',
-      props: ['quotes'],
-      setup() {
+      props: ['customerEmail'],
+      data(){
+        return{
+          limitQ:10,
+          offsetQ:0
+        }
+      },
+       setup(props) {
         const currentQuote=ref(null);
         let showButtons = true;
-
+      
         const tableHeaders = [
           'Quote Number',
           'Quote State',
@@ -268,9 +273,6 @@
 
           let errorMessage= ''
           let successMessage= '';
-
-
-          // const { user, register, login, loading } = useUser();
             
           return {
           tableHeaders,
@@ -279,6 +281,28 @@
           errorMessage,
           successMessage
         };
+      },
+      apollo:{
+        quotes: {
+          query: ALL_QUOTES_QUERY,
+          prefetch: true,
+          // Reactive parameters
+          variables () {
+            console.log("customerEmail ::34 "+this.customerEmail);
+            return {
+              limit:this.limitQ,
+              offset:this.offsetQ,
+              employeeEmail: this.customerEmail,
+            }
+          },
+          fetchPolicy:"network"
+          // variables:{
+          //   limit:10,
+          //   offset:0,
+          //   employeeEmail:''
+          // },
+          // fetchPolicy:"no-cache" 
+        }
       },
       methods :{
 

@@ -239,3 +239,168 @@ export const GET_QUOTE_BY_ID = gql`query($id:String!){
 	}
 }
 `
+
+export const ALL_EMPLOYEES_QUERY = gql`
+query ALL_EMPLOYEES_QUERY($limit:Int,$offset:Int, $where:String!){
+  employees(limit:$limit,offset:$offset, where:$where){
+    count
+    total
+    results{
+      id
+      employeeNumber
+      email
+      firstName
+      lastName
+      companyName
+      isEmailVerified
+      title
+      locale
+      salutation
+      dateOfBirth
+      companyName
+      vatId
+      customerGroupRef{
+        id
+        typeId
+      }
+      customerGroup{
+        id
+        name
+      }
+      amountExpended{
+        centAmount
+        currencyCode
+      }
+      addresses{
+            id
+  	        city
+            title
+            salutation
+            firstName
+            lastName
+            streetName
+            streetNumber
+            additionalStreetInfo
+            postalCode
+            city
+            region
+            state
+            country
+            company
+            department
+            building
+            apartment
+            pOBox
+            contactInfo{
+              phone
+              mobile
+              email
+              fax
+            }
+            additionalAddressInfo
+            externalId
+            key
+        }
+      defaultShippingAddress{
+        firstName
+        lastName
+        streetName
+        city
+        country
+      }
+    }
+  }
+}
+`;
+
+export const EMPLOYEE_BY_ID_QUERY = gql`
+query QUOTE_BY_ID_QUERY($id:String!){
+  employee(id:$id){
+      addresses{
+          id
+          city
+          title
+          salutation
+          firstName
+          lastName
+          streetName
+          streetNumber
+          additionalStreetInfo
+          postalCode
+          city
+          region
+          state
+          country
+          company
+          department
+          building
+          apartment
+          pOBox
+          contactInfo{
+            phone
+            mobile
+            email
+            fax
+          }
+          additionalAddressInfo
+          externalId
+          key
+      }
+  amountExpended{
+    centAmount
+    currencyCode
+    fractionDigits
+  }
+  employeeNumber
+  email
+  password
+  isEmailVerified
+  customerGroupRef{
+    id
+    typeId
+  }
+  externalId
+  key
+  firstName
+  lastName
+  middleName
+  title
+  locale
+  salutation
+  dateOfBirth
+  companyName
+  vatId
+  customerGroup{
+    id
+    name
+  }
+  defaultShippingAddress{
+    streetNumber
+    streetName
+    city
+    country
+    department
+    building
+    contactInfo{
+      fax
+      email
+      phone
+    }
+    postalCode
+  }
+  }
+}
+`;
+
+export const ADD_EMPLOYEE_MUTATION = gql`
+mutation createEmployee($email:String!, $firstName:String, $lastName:String!, $password:String!, $roles:[String!]!,$customerGroup:ResourceIdentifierInput!){
+  employeeSignUp(draft:{email:$email,password:$password,firstName:$firstName, lastName:$lastName, roles:$roles, customerGroup:$customerGroup}){
+      employee{
+          firstName
+          lastName
+          email
+          roles
+        }  
+      }  
+  }
+`;

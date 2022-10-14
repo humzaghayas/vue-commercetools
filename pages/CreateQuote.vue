@@ -82,8 +82,8 @@
                 <a class="button" :href="'#'" @click="createQuote(employeeId,email,companyId,currency)">Submit Quote</a>
                 <span>&nbsp;&nbsp;</span>
                 <a class="button" :href="'#'" @click="cancelQuote()">Cancel Quote</a>
-                <span>&nbsp;&nbsp;</span>
-                <a class="button" :href="'#'" @click="clearCart()">Clear Cart</a>
+                <!-- <span>&nbsp;&nbsp;</span>
+                <a class="button" :href="'#'" @click="clearCart()">Clear Cart</a> -->
               </div>
             </div>
 

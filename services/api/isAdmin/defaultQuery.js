@@ -10,6 +10,10 @@ query($where:String){
           value
         }
     	}
+      customerGroup{
+        id
+        key
+      }
     }
   }
 }

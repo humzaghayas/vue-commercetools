@@ -1,5 +1,6 @@
 const {categorySearch} =require( './services/api/categorySearch');
 const {isAdmin} =require( './services/api/isAdmin');
+const {getMe} =require( './services/api/getMe');
 const {customQueries} =require( './custom-queries');
 
 module.exports = {
@@ -13,6 +14,7 @@ module.exports = {
           extendApiMethods: {
             async categorySearch(context, params) { return categorySearch(context,params); },
             async isAdmin(context, params) { return isAdmin(context,params); },
+            async getMe(context, params) { return getMe(context,params); },
           }
         }
       ],

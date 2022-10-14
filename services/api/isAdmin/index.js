@@ -16,22 +16,25 @@ const isAdmin = async (context, params, customQuery) => {
     });
 
     let value=false;
+    let cGroupKey ='';
+    let cGroupId ='';
 
     if(request.data.customers.results != null && request.data.customers.results.length > 0){
-        if(request.data.customers.results[0].custom){
+      let customer = request.data.customers.results[0];
+        if(customer.custom){
             var cFields = request.data.customers.results[0].custom.customFieldsRaw.find(cf =>(cf.name === 'roles'));
             if( cFields ){//  c.name === 'roles'){
                 value = cFields.value.includes("b2b-company-admin");
             }
         }
+
+        if(customer.customerGroup && customer.customerGroup.key){
+          cGroupKey = customer.customerGroup.key;
+          cGroupId= customer.customerGroup.id;
+        }
     }
 
-    let cGroupKey ='';
-    if(request.data.customerGroup && request.data.customerGroup.key){
-      cGroupKey = request.data.customerGroup.key;
-    }
-  
-    return {"isAdmin":value,"companyId":cGroupKey};
+    return {"isAdmin":value,"companyId":cGroupKey,"customerGroupId":cGroupId};
 }
 
 module.exports ={isAdmin};

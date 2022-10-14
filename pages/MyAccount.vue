@@ -29,12 +29,18 @@
         </SfContentPage>
 
         <SfContentPage title="My quotes">
-          <MyQuotes :quotes="quotes"/>
+          <MyQuotes :customerEmail="email"/>
         </SfContentPage>
+
+
 
         <template v-if="isAdmin">
           <SfContentPage title="Quotes approval" >
-            <QuotesApproval :quotes="adminQuotes" :companyId="companyId"/>
+            <QuotesApproval :companyId="companyId"/>
+          </SfContentPage>
+
+          <SfContentPage title="My employees">
+            <MyEmployees :customerGroupId="customerGroupId"/>
           </SfContentPage>
         </template>
       </SfContentCategory>
@@ -60,13 +66,14 @@ import MyNewsletter from './MyAccount/MyNewsletter';
 import OrderHistory from './MyAccount/OrderHistory';
 import MyQuotes from './MyAccount/MyQuotes';
 import QuotesApproval from './MyAccount/QuotesApproval';
+import MyEmployees from './MyAccount/MyEmployees';
 
 import {
   mapMobileObserver,
   unMapMobileObserver
 } from '@storefront-ui/vue/src/utilities/mobile-observer.js';
 
-import {ALL_QUOTES_QUERY ,GET_SUBMITTED_QUOTES} from '../graphql/queries/quotesQueries'
+import {ALL_QUOTES_QUERY ,GET_SUBMITTED_QUOTES,ALL_EMPLOYEES_QUERY} from '../graphql/queries/quotesQueries'
 
 export default {
   name: 'MyAccount',
@@ -79,7 +86,8 @@ export default {
     MyNewsletter,
     OrderHistory,
     MyQuotes,
-    QuotesApproval
+    QuotesApproval,
+    MyEmployees
 },
   middleware: [
     'is-authenticated'
@@ -150,46 +158,44 @@ export default {
 
         const {data}= await $vsf.$ct.api.getMe({customer:true});
         const email = data.me.customer.email;
-
-        const res = await client.query({
-            query: ALL_QUOTES_QUERY,
-            variables: {
-              "limit": 10,
-              "offset": 0,
-              "employeeEmail": email
-            },
-            fetchPolicy:"no-cache" 
-        });
-        const { quotes } = res.data;
-        console.log('My Quotes :'+JSON.stringify(res));
-
-
-        const {isAdmin,companyId}= await $vsf.$ct.api.isAdmin({email});
-        let adminQuotes=[];
-
+        const {isAdmin,companyId,customerGroupId}= await $vsf.$ct.api.isAdmin({email});
+        
         console.log("IS ADMIN :: "+JSON.stringify(isAdmin));
+        console.log("Company Id :: "+JSON.stringify(companyId));
+        console.log("customer grp id :: "+JSON.stringify(customerGroupId));
 
         if(isAdmin){
-          const resAdmin = await client.query({
-              query: GET_SUBMITTED_QUOTES,
-              variables: {
-                "limit": 10,
-                "offset": 0,
-                "quoteState": ["submitted"],
-                companyId
-              },
-              fetchPolicy:"no-cache" 
-          });
-          adminQuotes = resAdmin.data;
+          // const resAdmin = await client.query({
+          //     query: GET_SUBMITTED_QUOTES,
+          //     variables: {
+          //       "limit": 10,
+          //       "offset": 0,
+          //       "quoteState": ["submitted"],
+          //       companyId
+          //     },
+          //     fetchPolicy:"no-cache" 
+          //   });
+          // adminQuotes = resAdmin.data;
 
-          console.log('Admin: '+JSON.stringify(resAdmin));
+          // const resEmployees = await client.query({
+          //   query: ALL_EMPLOYEES_QUERY,
+          //   variables: {
+          //     "limit": 10,
+          //     "offset": 0,
+          //     "where": "customerGroup(id=\"ebdf0b35-9397-484b-a1ac-9ffbf11be366\")"
+          //   },
+          //   fetchPolicy:"no-cache" 
+          // });
+          //  employees = resEmployees.data.employees;
         }
-
+        console.log("IS ADMIN :: "+JSON.stringify(customerGroupId));
         return {
-            quotes,
-            adminQuotes:adminQuotes.quotes,
+            //quotes,
+            // adminQuotes:adminQuotes.quotes,
             isAdmin,
-            companyId
+            companyId,
+            email,
+            customerGroupId
         };
     },
 };

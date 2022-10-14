@@ -1,6 +1,6 @@
 <template>
   <div >
-    <div v-if="$apollo.loading" class="loading">
+    <div v-if="$apollo.queries.quotes.loading" class="loading">
       </div>
     <div v-else>
       <SfTabs :open-tab="1">
@@ -247,7 +247,13 @@
     
     export default  {
       name: 'QuotesList',
-      props: ['quotes','companyId'],
+      props: ['companyId'],
+      data(){
+        return{
+          limitQ:10,
+          offsetQ:0
+        }
+      },
       setup() {
         const currentQuote=ref(null);
         let showButtons = true;
@@ -273,12 +279,21 @@
           errorMessage
         };
       },
-      // apollo: {
-      //     quotes: {
-      //     query: ALL_QUOTES_QUERY,
-      //     prefetch: true,
-      //     },
-      // },
+      apollo:{
+        quotes: {
+          query: GET_SUBMITTED_QUOTES,
+          // Reactive parameters
+          variables () {
+            return {
+              limit:this.limitQ,
+              offset:this.offsetQ,
+              quoteState: ["submitted"],
+              companyId:this.companyId
+            }
+          },
+          fetchPolicy:"network"
+        }
+      },
       methods :{
 
         async getAllQuotes(){
