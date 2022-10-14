@@ -107,7 +107,7 @@
       import {  useCart, cartGetters, useUser, userGetters } from '@vue-storefront/commercetools';
       import { onSSR } from '@vue-storefront/core';
       import { useUiState } from '~/composables';
-      import { CREATE_QUOTE_MUTATION ,GET_EMPLOYEE_DETAIL_QUERY} from '../graphql/queries/quotesQueries';
+      import { CREATE_QUOTE_MUTATION ,GET_EMPLOYEE_DETAIL_QUERY,UPDATE_QUOTE_MUTATION} from '../graphql/queries/quotesQueries';
     
 
       
@@ -228,6 +228,7 @@
                     } ;
 
                   let quoteId =null;
+                  let version=null;
                   await this.$apollo.mutate({
                     mutation: CREATE_QUOTE_MUTATION,
                     variables: createQuoteDraft
@@ -236,17 +237,39 @@
 
                     console.log("rs:: "+JSON.stringify(res));
                     quoteId=res.data.createQuote.id;
+                    version=res.data.createQuote.version;
                   }).catch((res) => {
                     alert('Error Occured!');
                     this.errorMessage= "Error Creating Quote!";
                     this.showButtons = true;
                   });
 
-                  let createQuoteDraftCustom = {
-                        currency,
-                        customerEmail:employeeEmail,
-                    } ;
+                  const actions = [
+                    {
+                      changeState :{
+                        state:"submitted"
+                      }
+                    }
+                  ];
 
+                  let updateQuoteDraft = {
+                    id:quoteId,
+                    version,
+                    actions
+                  } ;
+
+                  console.log("updateQuoteDraft"+ JSON.stringify(updateQuoteDraft));
+
+                  await this.$apollo.mutate({
+                    mutation: UPDATE_QUOTE_MUTATION,
+                    variables: updateQuoteDraft,
+                  },).then(res => {
+                    // this.currentQuote = res.data.updateQuote;
+                    this.successMessage= "Quote Submitted Successfully, Wait for Approval!";
+                  }).catch((res) => {
+                    this.errorMessage= "Error Submitting Quote!";
+                    this.showButtons = true;
+                  });
                   await this.clearCart();
 
                   console.log("T :: "+JSON.stringify(quoteId));

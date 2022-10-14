@@ -247,7 +247,7 @@
     
     export default  {
       name: 'QuotesList',
-      props: ['quotes'],
+      props: ['quotes','companyId'],
       setup() {
         const currentQuote=ref(null);
         let showButtons = true;
@@ -288,7 +288,8 @@
               variables: {
                 "limit": 10,
                 "offset": 0,
-                "quoteState": ["submitted"]
+                "quoteState": ["submitted"],
+                "companyId":this.companyId
               },
               fetchPolicy:"no-cache" 
           });

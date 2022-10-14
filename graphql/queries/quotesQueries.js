@@ -55,8 +55,8 @@ export const ALL_QUOTES_QUERY = gql`
       }
       `;
 export const GET_SUBMITTED_QUOTES = gql`
-query GET_SUBMITTED_QUOTES ($limit:Int,$offset:Int,$quoteState:[String!]){
-quotes (limit:$limit,offset:$offset,quoteState:$quoteState){
+query GET_SUBMITTED_QUOTES ($limit:Int,$offset:Int,$quoteState:[String!],$companyId:String!){
+quotes (limit:$limit,offset:$offset,quoteState:$quoteState,companyId:$companyId){
     count
     total
     results{
@@ -165,6 +165,7 @@ export const CREATE_QUOTE_MUTATION = gql`
 mutation CREATE_QUOTE_MUTATION($draft:CreateQuoteDraft!){
   createQuote(draft:$draft){
     id
+    version
     employeeId
     employeeEmail
   }

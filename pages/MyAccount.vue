@@ -34,7 +34,7 @@
 
         <template v-if="isAdmin">
           <SfContentPage title="Quotes approval" >
-            <QuotesApproval :quotes="adminQuotes"/>
+            <QuotesApproval :quotes="adminQuotes" :companyId="companyId"/>
           </SfContentPage>
         </template>
       </SfContentCategory>
@@ -164,7 +164,7 @@ export default {
         console.log('My Quotes :'+JSON.stringify(res));
 
 
-        const {isAdmin}= await $vsf.$ct.api.isAdmin({email});
+        const {isAdmin,companyId}= await $vsf.$ct.api.isAdmin({email});
         let adminQuotes=[];
 
         console.log("IS ADMIN :: "+JSON.stringify(isAdmin));
@@ -175,7 +175,8 @@ export default {
               variables: {
                 "limit": 10,
                 "offset": 0,
-                "quoteState": ["submitted"]
+                "quoteState": ["submitted"],
+                companyId
               },
               fetchPolicy:"no-cache" 
           });
@@ -187,7 +188,8 @@ export default {
         return {
             quotes,
             adminQuotes:adminQuotes.quotes,
-            isAdmin
+            isAdmin,
+            companyId
         };
     },
 };

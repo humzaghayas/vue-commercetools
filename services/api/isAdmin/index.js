@@ -25,8 +25,13 @@ const isAdmin = async (context, params, customQuery) => {
             }
         }
     }
+
+    let cGroupKey ='';
+    if(request.data.customerGroup && request.data.customerGroup.key){
+      cGroupKey = request.data.customerGroup.key;
+    }
   
-    return {"isAdmin":value};
+    return {"isAdmin":value,"companyId":cGroupKey};
 }
 
 module.exports ={isAdmin};
