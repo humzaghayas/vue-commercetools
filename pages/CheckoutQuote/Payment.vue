@@ -209,7 +209,7 @@ export default {
       const { data} = await $ct.api.getCart(cartId);
       const response = await $ct.api.createMyOrderFromCart({ id:data.cart.id, version :data.cart.version});
 
-      if (!response.data.order) return;
+      if (response.graphQLErrors || !response.data.order) return;
 
       const thankYouPath = { name: 'thank-you', query: { order: response.data.order.id }};
       router.push(context.root.localePath(thankYouPath));

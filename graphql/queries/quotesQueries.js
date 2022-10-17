@@ -242,7 +242,7 @@ export const GET_QUOTE_BY_ID = gql`query($id:String!){
 
 export const ALL_EMPLOYEES_QUERY = gql`
 query ALL_EMPLOYEES_QUERY($limit:Int,$offset:Int, $where:String!){
-  employees(limit:$limit,offset:$offset, where:$where){
+  employees(limit:$limit,offset:$offset, where:$where,sort:"createdAt desc"){
     count
     total
     results{

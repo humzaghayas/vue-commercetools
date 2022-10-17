@@ -42,6 +42,7 @@
           <SfContentPage title="My employees">
             <MyEmployees :customerGroupId="customerGroupId"/>
           </SfContentPage>
+
         </template>
       </SfContentCategory>
 

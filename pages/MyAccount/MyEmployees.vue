@@ -5,218 +5,12 @@
         </div>
       <div v-else>
         <SfTabs :open-tab="1">
-          <SfTab title="My employees">
-            <div v-if="currentEmployee">
-              <SfButton class="sf-button--text all-orders" @click="currentEmployee = null">All Employees</SfButton>
-              <div
-                  v-e2e="'order-details'"
-                  class="highlighted highlighted--total"
-                >
-  
-                <table style="width:500px">
-                    <tr>
-                      <td valign="top">
-                            <div>
-                               <h5>Salutation</h5>
-                                {{currentEmployee.salutation}}
-                            </div>
-                      </td>
-                  
-                      <td valign="top">
-                            <div>
-                               <h5>Vat Id</h5>
-                                {{currentEmployee.vatId}}
-                            </div>
-                      </td>
-                  
-                      <td valign="top">
-                            <div>
-                               <h5>Amount Extended</h5>
-                                {{currentEmployee.amountExpended.centAmount/100}}
-                            </div>
-                      </td>
-                  
-                      <td valign="top">
-                            <div>
-                               <h5>Title</h5>
-                                {{currentEmployee.title}}
-                            </div>
-                      </td>
-                  
-                      <td valign="top">
-                            <div>
-                               <h5>Email State</h5>
-                                <p v-if="currentEmployee.isEmailVerified">
-                                    Verified
-                                </p>
-                                <p v-else>
-                                    Not Verified
-                                </p>
-                            </div>
-                      </td>
-                    </tr>
-                    <tr v-for="address in currentEmployee.addresses" :key="address.id">
-                        <th>Address</th>
-                          <td valign="top">
-                                <div>
-                                   <h5>Street Name</h5>
-                                    {{address.streetName}}
-                                </div>
-                          </td>
-                          <td valign="top">
-                                <div>
-                                   <h5>Street Number</h5>
-                                    {{address.streetNumber}}
-                                </div>
-                          </td>
-                          <td valign="top">
-                                <div>
-                                   <h5>Region</h5>
-                                    {{address.region}}
-                                </div>
-                          </td>
-                          <td valign="top">
-                                <div>
-                                   <h5>City</h5>
-                                    {{address.city}}
-                                </div>
-                          </td>
-                          <td valign="top">
-                                <div>
-                                   <h5>State</h5>
-                                    {{address.state}}
-                                </div>
-                          </td>
-                          <td valign="top">
-                                <div>
-                                   <h5>Country</h5>
-                                    {{address.country}}
-                                </div>
-                          </td>
-                          <td valign="top">
-                                <div>
-                                   <h5>Postal Code</h5>
-                                    {{address.postalCode}}
-                                </div>
-                          </td>
-                          <!-- <tr v-if="address.contactInfo">
-            <td valign="top">
-                <div>
-                   <h5>Phone</h5>
-                    {{address.contactInfo.phone}}
-                </div>
-          </td>
-          <td valign="top">
-                <div>
-                   <h5>Mobile</h5>
-                    {{address.contactInfo.mobile}}
-                </div>
-          </td>
-          <td valign="top">
-                <div>
-                   <h5>Email</h5>
-                    {{address.contactInfo.email}}
-                </div>
-          </td>
-          <td valign="top">
-                <div>
-                   <h5>Fax</h5>
-                    {{address.contactInfo.fax}}
-                </div>
-          </td>
-          </tr> -->
-                    </tr>
-                </table>
-            </div>
-              <div>
-                <h3>Employee</h3>
-                <SfProperty
-                  name="Employee Email"
-                  :value="currentEmployee.email"
-                  class="sf-property--full-width property"
-                />
-              <SfProperty
-                  name="Company Name"
-                  :value="currentEmployee.customerGroup.name"
-                  class="sf-property--full-width property"
-                />
-              </div>
-  
-            </div>
-            <div v-else>
-              <p class="message">
-                 List of All Employees 
-              </p>
-                        
-              <div v-if="employees.results.length === 0" class="no-orders">
-                <p class="no-orders__title">{{ $t('You currently have no orders') }}</p>
-                <!-- <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton> -->
-              </div>
-              <SfTable v-else class="orders">
-                <SfTableHeading>
-                  <SfTableHeader
-                    v-for="tableHeader in tableHeaders"
-                    :key="tableHeader"
-                    
-                  >{{ tableHeader }}</SfTableHeader>
-                  <SfTableHeader class="orders__element--right" />
-                </SfTableHeading>
-                <SfTableRow v-for="employee in employees.results" :key="employee.id">
-                  <SfTableData v-e2e="'employee-first-name'">{{ employee.firstName}}</SfTableData>
-                  <SfTableData v-e2e="'employee-last-name'">{{ employee.lastName }}</SfTableData>
-                  <SfTableData v-e2e="'employee-company-name'">{{ employee.customerGroup.name }}</SfTableData>
-                  <SfTableData v-e2e="'employee-email'">{{ employee.email }}</SfTableData>
-                  <SfTableData v-e2e="'employee-expended-amount'">
-                    <p v-if="employee.amountExpended"> 
-                        {{ employee.amountExpended.centAmount/100 }} - {{employee.amountExpended.currencyCode}}
-                    </p>
-                    <p v-else>
-                        0
-                    </p>
-                  </SfTableData>
-                  <SfTableData class="orders__view orders__element--right">
-                    <SfButton class="sf-button--text desktop-only" @click="currentEmployee = employee">
-                      {{ $t('View details') }}
-                    </SfButton>
-                  </SfTableData>
-                </SfTableRow>
-              </SfTable>
-              <!-- <div
-                v-e2e="'order-history-pagination'"
-                class="pagination"
-                v-if="orders.length < totalOrders"
-              >
-                <SfArrow
-                  aria-label="prev"
-                  class="sf-arrow--left sf-arrow--transparent"
-                  :disabled="offset === 0"
-                  @click="goPrev(offset)"
-                />
-                <div
-                  v-e2e="'order-history-pagination-count'"
-                  class="pagination-count"
-                >
-                  {{ orders.length > 1 ? `${offset + 1} - ` : "" }} {{ offset + orders.length }}
-                  <strong>of</strong> {{ totalOrders }}
-                </div>
-                <SfArrow
-                  aria-label="next"
-                  class="sf-arrow--right sf-arrow--transparent"
-                  :disabled="(offset + orders.length) === totalOrders"
-                  @click="goNext(offset)"
-                />
-              </div> -->
-            </div>
-          </SfTab>
-          <SfTab title="Returns">
-            <p class="message">
-              This feature is not implemented yet! Please take a look at
-              <br />
-              <SfLink class="message__link" href="#">https://github.com/DivanteLtd/vue-storefront/issues</SfLink>
-              for our Roadmap!
-            </p>
-          </SfTab>
-          <SfTab title="Add Employee">
+          
+                <SfTab title="My employees">
+
+                  <div v-if="isAddEmployee">
+            <SfButton class="sf-button--text all-orders" @click="isAddEmployee = !isAddEmployee">All Employees</SfButton>
+
             <form  class="form" @submit.prevent="addEmployeeData"> 
                 <div class="form__horizontal">
                    <div class="form-element">
@@ -273,9 +67,221 @@
                     </SfButton>
                 </div>
             </form>
-            
-          </SfTab>
-        </SfTabs>
+
+
+
+          </div>
+          <div v-else>
+                  
+                  <SfButton class="sf-button--text all-orders" @click="isAddEmployee = !isAddEmployee;" v-if="!isAddEmployee">
+                    Add Employees
+                  </SfButton>
+                  <div v-if="currentEmployee">
+                    <SfButton class="sf-button--text all-orders" @click="currentEmployee = null">All Employees</SfButton>
+                    <div
+                        v-e2e="'order-details'"
+                        class="highlighted highlighted--total"
+                      >
+        
+                      <table style="width:500px">
+                          <tr>
+                            <td valign="top">
+                                  <div>
+                                    <h5>Salutation</h5>
+                                      {{currentEmployee.salutation}}
+                                  </div>
+                            </td>
+                        
+                            <td valign="top">
+                                  <div>
+                                    <h5>Vat Id</h5>
+                                      {{currentEmployee.vatId}}
+                                  </div>
+                            </td>
+                        
+                            <td valign="top">
+                                  <div>
+                                    <h5>Amount Extended</h5>
+                                      {{currentEmployee.amountExpended.centAmount/100}}
+                                  </div>
+                            </td>
+                        
+                            <td valign="top">
+                                  <div>
+                                    <h5>Title</h5>
+                                      {{currentEmployee.title}}
+                                  </div>
+                            </td>
+                        
+                            <td valign="top">
+                                  <div>
+                                    <h5>Email State</h5>
+                                      <p v-if="currentEmployee.isEmailVerified">
+                                          Verified
+                                      </p>
+                                      <p v-else>
+                                          Not Verified
+                                      </p>
+                                  </div>
+                            </td>
+                          </tr>
+                          <tr v-for="address in currentEmployee.addresses" :key="address.id">
+                              <th>Address</th>
+                                <td valign="top">
+                                      <div>
+                                        <h5>Street Name</h5>
+                                          {{address.streetName}}
+                                      </div>
+                                </td>
+                                <td valign="top">
+                                      <div>
+                                        <h5>Street Number</h5>
+                                          {{address.streetNumber}}
+                                      </div>
+                                </td>
+                                <td valign="top">
+                                      <div>
+                                        <h5>Region</h5>
+                                          {{address.region}}
+                                      </div>
+                                </td>
+                                <td valign="top">
+                                      <div>
+                                        <h5>City</h5>
+                                          {{address.city}}
+                                      </div>
+                                </td>
+                                <td valign="top">
+                                      <div>
+                                        <h5>State</h5>
+                                          {{address.state}}
+                                      </div>
+                                </td>
+                                <td valign="top">
+                                      <div>
+                                        <h5>Country</h5>
+                                          {{address.country}}
+                                      </div>
+                                </td>
+                                <td valign="top">
+                                      <div>
+                                        <h5>Postal Code</h5>
+                                          {{address.postalCode}}
+                                      </div>
+                                </td>
+                                <!-- <tr v-if="address.contactInfo">
+                  <td valign="top">
+                      <div>
+                        <h5>Phone</h5>
+                          {{address.contactInfo.phone}}
+                      </div>
+                </td>
+                <td valign="top">
+                      <div>
+                        <h5>Mobile</h5>
+                          {{address.contactInfo.mobile}}
+                      </div>
+                </td>
+                <td valign="top">
+                      <div>
+                        <h5>Email</h5>
+                          {{address.contactInfo.email}}
+                      </div>
+                </td>
+                <td valign="top">
+                      <div>
+                        <h5>Fax</h5>
+                          {{address.contactInfo.fax}}
+                      </div>
+                </td>
+                </tr> -->
+                          </tr>
+                      </table>
+                  </div>
+                    <div>
+                      <h3>Employee</h3>
+                      <SfProperty
+                        name="Employee Email"
+                        :value="currentEmployee.email"
+                        class="sf-property--full-width property"
+                      />
+                    <SfProperty
+                        name="Company Name"
+                        :value="currentEmployee.customerGroup.name"
+                        class="sf-property--full-width property"
+                      />
+                    </div>
+        
+                  </div>
+                  <div v-else>
+                    <p class="message">
+                      List of All Employees 
+                    </p>
+                              
+                    <div v-if="employees.results.length === 0" class="no-orders">
+                      <p class="no-orders__title">{{ $t('You currently have no orders') }}</p>
+                      <!-- <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton> -->
+                    </div>
+                    <SfTable v-else class="orders">
+                      <SfTableHeading>
+                        <SfTableHeader
+                          v-for="tableHeader in tableHeaders"
+                          :key="tableHeader"
+                          
+                        >{{ tableHeader }}</SfTableHeader>
+                        <SfTableHeader class="orders__element--right" />
+                      </SfTableHeading>
+                      <SfTableRow v-for="employee in employees.results" :key="employee.id">
+                        <SfTableData v-e2e="'employee-first-name'">{{ employee.firstName}}</SfTableData>
+                        <SfTableData v-e2e="'employee-last-name'">{{ employee.lastName }}</SfTableData>
+                        <SfTableData v-e2e="'employee-company-name'">{{ employee.customerGroup.name }}</SfTableData>
+                        <SfTableData v-e2e="'employee-email'">{{ employee.email }}</SfTableData>
+                        <SfTableData v-e2e="'employee-expended-amount'">
+                          <p v-if="employee.amountExpended"> 
+                              {{ employee.amountExpended.centAmount/100 }} - {{employee.amountExpended.currencyCode}}
+                          </p>
+                          <p v-else>
+                              0
+                          </p>
+                        </SfTableData>
+                        <SfTableData class="orders__view orders__element--right">
+                          <SfButton class="sf-button--text desktop-only" @click="currentEmployee = employee">
+                            {{ $t('View details') }}
+                          </SfButton>
+                        </SfTableData>
+                      </SfTableRow>
+                    </SfTable>
+                    <!-- <div
+                      v-e2e="'order-history-pagination'"
+                      class="pagination"
+                      v-if="orders.length < totalOrders"
+                    >
+                      <SfArrow
+                        aria-label="prev"
+                        class="sf-arrow--left sf-arrow--transparent"
+                        :disabled="offset === 0"
+                        @click="goPrev(offset)"
+                      />
+                      <div
+                        v-e2e="'order-history-pagination-count'"
+                        class="pagination-count"
+                      >
+                        {{ orders.length > 1 ? `${offset + 1} - ` : "" }} {{ offset + orders.length }}
+                        <strong>of</strong> {{ totalOrders }}
+                      </div>
+                      <SfArrow
+                        aria-label="next"
+                        class="sf-arrow--right sf-arrow--transparent"
+                        :disabled="(offset + orders.length) === totalOrders"
+                        @click="goNext(offset)"
+                      />
+                    </div> -->
+                  </div>
+                  </div>
+                </SfTab>
+                                  
+              </SfTabs>
+              
         </div>
       </div>
       </template>
@@ -314,11 +320,14 @@
             'Email',
             'Amount Expended'
             ];
+
+            const isAddEmployee =false;
             // const { user, register, login, loading } = useUser();.
             // const addEmployeeData = ({ form, onComplete, onError }) => formHandler(() => console.log("Add Employee Form Value"+form.value), onComplete, onError);
             return {
             tableHeaders,
-            currentEmployee,            
+            currentEmployee, 
+            isAddEmployee           
             // register,
             // login,
             // loading,
@@ -343,7 +352,7 @@
                               password:'',
                               selectedRoles:[]
                         },
-                      limitQ:10,
+                      limitQ:20,
                       offsetQ:0,
                   }
             },
@@ -379,7 +388,7 @@
                     email:this.emp.email,
                     roles:this.emp.selectedRoles,
                     customerGroup:{
-                        id: "ebdf0b35-9397-484b-a1ac-9ffbf11be366"
+                        id: this.customerGroupId
                     }
                 }
 
@@ -390,12 +399,14 @@
                     mutation: ADD_EMPLOYEE_MUTATION,
                     variables: addEmployeeDraft
                 }).then((res)=>{
-                    window.location.reload();
+                  window.location.reload();
                     console.log("Employee Created"+res)
                 }).catch((err)=>{
                     console.log("Error in Employee create Mutation"+err);
                 });
+                this.isAddEmployee = false;
 
+                this.$apollo.queries.employees.refresh();
                 
 
             }

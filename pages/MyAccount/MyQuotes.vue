@@ -168,10 +168,6 @@
               <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton>
             </div>
             <SfTable v-else class="orders">
-
-              <div v-show="false">
-                {{getCartStatuses(quotes)}}
-              </div>
               <SfTableHeading>
                 <SfTableHeader
                   v-for="tableHeader in tableHeaders"
@@ -179,7 +175,7 @@
                 >{{ tableHeader }}</SfTableHeader>
                 <SfTableHeader class="orders__element--right" />
               </SfTableHeading>
-              <SfTableRow v-for="quote in quotes.results" :key="quote.id">
+              <SfTableRow v-for="quote in quotes.results" :key="quote.id" >
                 <SfTableData v-e2e="'quote-number'">{{ quote.quoteNumber}}</SfTableData>
                 <SfTableData v-e2e="'quote-state'">{{ quote.quoteState }}</SfTableData>
                 <SfTableData v-e2e="'quote-company-name'">{{ quote.company.name }}</SfTableData>
@@ -330,18 +326,28 @@ import { onSSR, useVSFContext, vsfRef } from '@vue-storefront/core';
           // fetchPolicy:"no-cache" 
         }
       },
+      watch:{
+        // if(!this.$apollo.queries.quotes.loading){
+        //   this.getCartsStatuses(this.quotes);
+        // }
+
+        quotes:'getCartsStatuses'
+      },
       methods :{
 
-        async getCartStatuses(quotesArray){
-          
-          if(this.quoteCartStatus == null){
-            var cartIds = quotesArray.results.map(q => q.id);
-            console.log('cart ids :: '+JSON.stringify(cartIds));
-            const {results}=await this.$vsf.$ct.api.getCartsStatuses({"cartIds":cartIds});
-            this.quoteCartStatus = results;
+        async getCartsStatuses(){
 
-            console.log('statusess 123:: '+JSON.stringify(this.quoteCartStatus));
+          if(this.quotes === null){
+            return false;
           }
+          
+          const quotesArray = this.quotes;
+          var cartIds = quotesArray.results.map(q => q.id);
+          console.log('cart ids :: '+JSON.stringify(cartIds));
+          const {results}=await this.$vsf.$ct.api.getCartsStatuses({"cartIds":cartIds});
+          this.quoteCartStatus = results;
+
+          console.log('statusess 123:: '+JSON.stringify(this.quoteCartStatus));
           return false;
         },
         async createOrder(quoteId){
