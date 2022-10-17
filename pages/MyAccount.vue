@@ -164,30 +164,7 @@ export default {
         console.log("Company Id :: "+JSON.stringify(companyId));
         console.log("customer grp id :: "+JSON.stringify(customerGroupId));
 
-        if(isAdmin){
-          // const resAdmin = await client.query({
-          //     query: GET_SUBMITTED_QUOTES,
-          //     variables: {
-          //       "limit": 10,
-          //       "offset": 0,
-          //       "quoteState": ["submitted"],
-          //       companyId
-          //     },
-          //     fetchPolicy:"no-cache" 
-          //   });
-          // adminQuotes = resAdmin.data;
-
-          // const resEmployees = await client.query({
-          //   query: ALL_EMPLOYEES_QUERY,
-          //   variables: {
-          //     "limit": 10,
-          //     "offset": 0,
-          //     "where": "customerGroup(id=\"ebdf0b35-9397-484b-a1ac-9ffbf11be366\")"
-          //   },
-          //   fetchPolicy:"no-cache" 
-          // });
-          //  employees = resEmployees.data.employees;
-        }
+        
         console.log("IS ADMIN :: "+JSON.stringify(customerGroupId));
         return {
             //quotes,

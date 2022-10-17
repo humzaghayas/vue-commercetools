@@ -62,7 +62,7 @@ export default {
     };
 
     return {
-      shippingAddresses: userShippingGetters.getAddresses(userShipping.value),
+      shippingAddresses: [],//userShippingGetters.getAddresses(userShipping.value),
       setCurrentAddress,
       userShippingGetters
     };

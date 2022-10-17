@@ -106,7 +106,7 @@
       import { computed, ref, useRouter } from '@nuxtjs/composition-api';
       import {  useCart, cartGetters, useUser, userGetters } from '@vue-storefront/commercetools';
       import { onSSR } from '@vue-storefront/core';
-      import { useUiState } from '~/composables';
+      import { useShippingAddressQuote, useUiState } from '~/composables';
       import { CREATE_QUOTE_MUTATION ,GET_EMPLOYEE_DETAIL_QUERY,UPDATE_QUOTE_MUTATION} from '../graphql/queries/quotesQueries';
     
 
@@ -133,10 +133,15 @@
           const user = useUser();
           const router = useRouter();
           const { toggleCartSidebar} = useUiState();
+          
+          const {load:loadCart} =useShippingAddressQuote();
+
+          
 
           onSSR(async () => {
                 await user.load();
                 await load();
+
           });
 
 
@@ -191,12 +196,18 @@
             clear,
             toggleCartSidebar,
             load,
-            clearCart
+            clearCart,
+            loadCart
           };
         },
         methods :{
   
               async createQuote (employeeId,employeeEmail,companyId,currency) {
+
+                // const data=  await this.loadCart("e0815b2a-3c6f-475b-aa5e-863c1b8faa17");
+
+                // console.log("DAta:: "+JSON.stringify(data));
+                // return;
 
                 this.successMessage='';
                 this.errorMessage='';

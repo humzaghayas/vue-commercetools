@@ -168,6 +168,10 @@
               <SfButton class="no-orders__button">{{ $t('Start shopping') }}</SfButton>
             </div>
             <SfTable v-else class="orders">
+
+              <div v-show="false">
+                {{getCartStatuses(quotes)}}
+              </div>
               <SfTableHeading>
                 <SfTableHeader
                   v-for="tableHeader in tableHeaders"
@@ -191,6 +195,14 @@
                   <SfButton class="sf-button--text desktop-only" @click="currentQuote = quote;successMessage='';errorMessage='';showButtons=true;">
                     {{ $t('View details') }}
                   </SfButton>
+                </SfTableData>
+                <SfTableData class="orders__view orders__element--right" v-if="quote.quoteState === 'approved' && quoteCartStatus!== null && quoteCartStatus[quote.id] === 'Active'">
+                  <SfButton class="sf-button--text desktop-only" @click="createOrder(quote.id);">
+                    {{ $t('Create Order') }}
+                  </SfButton>
+                </SfTableData>
+                <SfTableData class="orders__view orders__element--right" v-else>
+                  &nbsp;
                 </SfTableData>
               </SfTableRow>
             </SfTable> 
@@ -256,11 +268,14 @@ import { onSSR, useVSFContext, vsfRef } from '@vue-storefront/core';
       data(){
         return{
           limitQ:10,
-          offsetQ:0
+          offsetQ:0,
+          quoteCartStatus:null
         }
       },
        setup(props) {
         const currentQuote=ref(null);
+
+        const {$ct} =useVSFContext()
         let showButtons = true;
       
         const tableHeaders = [
@@ -273,13 +288,24 @@ import { onSSR, useVSFContext, vsfRef } from '@vue-storefront/core';
 
           let errorMessage= ''
           let successMessage= '';
+
+          // onSSR(async (quotes) => {
+          //   var cartIds = quotes.results.map(q => q.id);
+          //     console.log('cart ids :: '+JSON.stringify(cartIds));
+          //     const {results}=await this.$vsf.$ct.api.getCartsStatuses({"cartIds":cartIds});
+          //     quoteCartStatus = results;
+
+          //     console.log('statusess 123:: '+JSON.stringify(this.quoteCartStatus));
+
+          //     return false;
+          // });
             
           return {
           tableHeaders,
           currentQuote,
           showButtons,
           errorMessage,
-          successMessage
+          successMessage,
         };
       },
       apollo:{
@@ -306,6 +332,25 @@ import { onSSR, useVSFContext, vsfRef } from '@vue-storefront/core';
       },
       methods :{
 
+        async getCartStatuses(quotesArray){
+          
+          if(this.quoteCartStatus == null){
+            var cartIds = quotesArray.results.map(q => q.id);
+            console.log('cart ids :: '+JSON.stringify(cartIds));
+            const {results}=await this.$vsf.$ct.api.getCartsStatuses({"cartIds":cartIds});
+            this.quoteCartStatus = results;
+
+            console.log('statusess 123:: '+JSON.stringify(this.quoteCartStatus));
+          }
+          return false;
+        },
+        async createOrder(quoteId){
+          this.$router.push({
+            path:'/checkoutquote',
+            query: { quoteId}});
+
+            return false;
+        },
         async updateQuoteStatus(status,id,ver) {
 
           this.errorMessage= ''

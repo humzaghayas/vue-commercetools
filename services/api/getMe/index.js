@@ -4,7 +4,11 @@ const gql =require ('graphql-tag');
  
 const getMe = async (context, params, customQuery) => {
   const { locale, acceptLanguage, currency } = context.config;
-  const { customer }= params;
+
+  let customer = false;
+  if(params){
+    customer = params.customer;
+  }
 
   const defaultVariables = {
     locale,
