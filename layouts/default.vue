@@ -31,7 +31,7 @@ import WishlistSidebar from '~/components/WishlistSidebar.vue';
 import LoginModal from '~/components/LoginModal.vue';
 import LazyHydrate from 'vue-lazy-hydration';
 import Notification from '~/components/Notification';
-import { onSSR } from '@vue-storefront/core';
+import { onSSR, useVSFContext } from '@vue-storefront/core';
 import { useRoute } from '@nuxtjs/composition-api';
 import { useCart, useStore, useUser, useWishlist } from '@vue-storefront/commercetools';
 
@@ -53,23 +53,45 @@ export default {
   setup() {
     const route = useRoute();
     const { load: loadStores } = useStore();
-    const { load: loadUser } = useUser();
+    const { isAuthenticated,load } = useUser();
     const { load: loadCart } = useCart();
     const { load: loadWishlist } = useWishlist();
 
+    const {$ct} = useVSFContext()
+
     onSSR(async () => {
-      await Promise.all([
-        loadStores(),
-        loadUser(),
-        loadCart(),
-        loadWishlist()
-      ]);
+        await loadStores();
+        const user = await load();
+        await loadCart();
+        await loadWishlist();
+
+        const profile = await $ct.api.getMe({ customer: true }, {});
+        console.log("profile 1212:: "+JSON.stringify(profile));
+        console.log("user 1212:: "+JSON.stringify(user));
+
+        console.log("isAuthenticated :: "+JSON.stringify(isAuthenticated))
     });
 
     return {
-      route
+      route,
+      load,
+      loadCart,
+      isAuthenticated
     };
+  },
+  async mounted() {
+
+    await this.load();
+    await this.loadCart();
+    console.log("t: "+ JSON.stringify(this.isAuthenticated));
+    // async getUser(){
+     
+    // }
+  },
+  computed:{
+
   }
+ 
 };
 </script>
 

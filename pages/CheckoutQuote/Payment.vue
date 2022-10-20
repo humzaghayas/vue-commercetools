@@ -81,12 +81,12 @@
           <div class="product-title">{{ cartGetters.getItemName(product) }}</div>
           <div class="product-sku">{{ cartGetters.getItemSku(product) }}</div>
         </SfTableData>
-        <SfTableData
+        <!-- <SfTableData
           class="table__data" v-for="(value, key) in cartGetters.getItemAttributes(product, ['size', 'color'])"
           :key="key"
         >
           {{ value }}
-        </SfTableData>
+        </SfTableData> -->
         <SfTableData class="table__data">{{ cartGetters.getItemQty(product) }}</SfTableData>
         <SfTableData class="table__data price">
           <SfPrice
@@ -229,7 +229,7 @@ export default {
       terms,
       removeItem,
       processOrder,
-      tableHeaders: ['Description', 'Size', 'Color', 'Quantity', 'Amount'],
+      tableHeaders: ['Description',  'Quantity', 'Amount'],
       cartGetters,
       getShippingMethodPrice,
       paymentReady,

@@ -14,6 +14,16 @@
       </SfHero>
     </LazyHydrate>
 
+    <!-- who we are -->
+    <LazyHydrate when-visible>
+      <div class="similar-products">
+        <SfHeading title="Who we are" :level="2"/>
+        <nuxt-link :to="localePath('/c/women')" class="smartphone-only">
+          {{ $t('See all') }}
+        </nuxt-link>
+      </div>
+    </LazyHydrate>
+
     <LazyHydrate when-visible>
       <SfBannerGrid :banner-grid="1" class="banner-grid">
         <template v-for="item in banners" v-slot:[item.slot]>
@@ -23,12 +33,52 @@
             :subtitle="item.subtitle"
             :description="item.description"
             :button-text="item.buttonText"
-            :link="localePath(item.link)"
+            link=""
             :image="item.image"
             :class="item.class"
           />
         </template>
       </SfBannerGrid>
+    </LazyHydrate>
+
+    <!-- Our Therapeutic Categories -->
+    <LazyHydrate when-visible>
+      <div class="similar-products">
+        <SfHeading title="Our Therapeutic Categories" :level="2"/>
+        <nuxt-link :to="localePath('/c/women')" class="smartphone-only">
+          {{ $t('See all') }}
+        </nuxt-link>
+      </div>
+    </LazyHydrate>
+    <LazyHydrate when-visible>
+        <SfCarousel class="carousel" :settings="{ peek: 16, breakpoints: { 1023: { peek: 0, perView: 2 } } }">
+          <template #prev="{go}">
+            <SfArrow
+              aria-label="prev"
+              class="sf-arrow--left sf-arrow--long"
+              @click="go('prev')"
+            />
+          </template>
+          <template #next="{go}">
+            <SfArrow
+              aria-label="next"
+              class="sf-arrow--right sf-arrow--long"
+              @click="go('next')"
+            />
+          </template>
+          <SfCarouselItem class="carousel__item" v-for="(banner, i) in banners" :key="i">
+            <SfCard
+              :image=banner.image
+              :imageWidth="288"
+              :imageHeight="189"
+              :title=banner.title
+              :titleLevel="3"
+              :description=banner.description
+              link=""
+              :buttonText=banner.buttonText
+            />
+          </SfCarouselItem>
+        </SfCarousel>
     </LazyHydrate>
 
     <LazyHydrate when-visible>
@@ -73,7 +123,9 @@
         </SfCarousel>
     </LazyHydrate>
 
-    <LazyHydrate when-visible>
+    
+
+    <!-- <LazyHydrate when-visible>
       <SfCallToAction
         title="Subscribe to Newsletters"
         button-text="Subscribe"
@@ -91,15 +143,15 @@
           </SfButton>
         </template>
       </SfCallToAction>
-    </LazyHydrate>
+    </LazyHydrate> -->
 
     <LazyHydrate when-visible>
       <NewsletterModal @email-submitted="onSubscribe" />
     </LazyHydrate>
 
-    <LazyHydrate when-visible>
+    <!-- <LazyHydrate when-visible>
       <InstagramFeed />
-    </LazyHydrate>
+    </LazyHydrate> -->
 
   </div>
 </template>
@@ -115,7 +167,8 @@ import {
   SfBannerGrid,
   SfHeading,
   SfArrow,
-  SfButton
+  SfButton,
+  SfCard
 } from '@storefront-ui/vue';
 import { ref, useContext } from '@nuxtjs/composition-api';
 import InstagramFeed from '~/components/InstagramFeed.vue';
@@ -123,6 +176,8 @@ import NewsletterModal from '~/components/NewsletterModal.vue';
 import LazyHydrate from 'vue-lazy-hydration';
 import { useUiState } from '../composables';
 import cacheControl from './../helpers/cacheControl';
+import { createClient } from '~/plugins/contentful.js';
+const client = createClient();
 
 export default {
   name: 'Home',
@@ -143,6 +198,7 @@ export default {
     SfHeading,
     SfArrow,
     SfButton,
+    SfCard,
     NewsletterModal,
     LazyHydrate
   },
@@ -250,10 +306,10 @@ export default {
         title: 'Linen Dresses',
         description:
           'Find stunning women\'s cocktail dresses and party dresses. Stand out in lace and metallic cocktail dresses from all your favorite brands.',
-        buttonText: 'Shop now',
+        // buttonText: 'Shop now',
         image: $config.theme.home.bannerB.image,
         class: 'sf-banner--slim banner-central desktop-only',
-        link: $config.theme.home.bannerB.link
+        // link: $config.theme.home.bannerB.link
       },
       {
         slot: 'banner-C',
@@ -286,10 +342,89 @@ export default {
       toggleWishlist,
       toggleNewsletterModal,
       onSubscribe,
-      banners,
-      heroes,
-      products
+      // banners,
+      // heroes,
+      // products
     };
+  },
+  asyncData(){
+    return Promise.all([
+    client.getEntries({
+        'content_type': 'banner',
+        order: '-sys.createdAt'
+        }),
+    client.getEntries({
+            'content_type': 'contentTile',
+            order: '-sys.createdAt'
+        }),
+    client.getEntries({
+        'content_type': 'middleBanner',
+        order: '-sys.createdAt'
+    }),
+
+        
+    ]).then(
+      ([ctfHeroes, ctfBanners, middleBanners]) =>{
+
+        // console.log("Heroes " + JSON.stringify(ctfHeroes.items));
+        // console.log("middleBanner " + JSON.stringify(middleBanners.items));
+
+        const banners = [];
+        const heroes  = [];
+        const products = [];
+        const jfu = ctfBanners.items.filter(item=>item.fields.title.includes("Just for you"));
+        const ctfHItems = ctfHeroes.items;
+        const ctfMiddleBanners = middleBanners.items;
+        // console.log("JFU:"+JSON.stringify(jfu));
+
+        for(let i in jfu){
+          const p ={
+            title: jfu[i].fields.primaryText.content[0].content[0].value,
+            image: jfu[i].fields.media?.fields?.file?.url,
+            price: { regular: '50.00 $' },
+            rating: { max: 5, score: 4 },
+            isInWishlist: true
+          }
+          products.push(p);
+        }
+
+        for(let i in ctfMiddleBanners){
+          const b = {
+                slot: ctfMiddleBanners[i].fields.slot,
+                // subtitle: ctfMiddleBanners[i].fields.subtitle,
+                title: ctfMiddleBanners[i].fields.title,
+                description:ctfMiddleBanners[i].fields.description,
+                buttonText: ctfMiddleBanners[i].fields.buttonText,
+                image: ctfMiddleBanners[i].fields.image?.fields?.file?.url,
+                class: ctfMiddleBanners[i].fields.class,//'sf-banner--slim banner__tshirt',
+                // link: ctfMiddleBanners[i].fields.image?.fields?.file?.url
+          }
+          banners.push(b);
+        }
+
+        for(let i in ctfHItems){
+          const h ={
+            title: ctfHItems[i].fields.title,
+            subtitle: ctfHItems[i].fields.subtitle,
+            background: '#eceff1',
+            image: ctfHItems[i].fields.image?.fields.file.url
+          }
+
+          heroes.push(h)
+        }
+
+        // console.log("Banners :");console.log(banners);
+        // console.log("Heroes:" );console.log(heroes)
+
+         return {
+          heroes,
+          banners,
+          products
+         }
+
+      }
+    )
+
   }
 };
 </script>

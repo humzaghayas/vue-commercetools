@@ -1,6 +1,6 @@
 <template>
   <div v-if="!loading">
-    <div class="sf-header__navigation desktop" v-if="!isMobile">
+    <div class="sf-header__navigation desktop" id="header-navigation" v-if="!isMobile">
       <SfHeaderNavigationItem
         v-for="(category, index) in categories"
         :key="index"
@@ -69,9 +69,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#header-navigation{
+  ::v-deep {
+    .sf-header-navigation-item__item--desktop > *:not(.sf-mega-menu){
+            text-decoration: none;
+    color: #5f4ba0;
+    /* font-size: 30px; */
+    /* font-family: "DRLCircular-Black"; */
+    font-family: sans-serif;
+    margin: auto;
+    font-weight: 550;
+    font-size: 16px;
+    }
+  }
+}
 .sf-header-navigation-item {
   ::v-deep &__item--mobile {
     display: block;
+ 
   }
 }
 .sf-modal {

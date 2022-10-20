@@ -198,7 +198,7 @@ import { ref, watch, reactive, computed } from '@nuxtjs/composition-api';
 import { SfModal, SfInput, SfButton, SfCheckbox, SfLoader, SfAlert, SfBar } from '@storefront-ui/vue';
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate';
 import { required, email } from 'vee-validate/dist/rules';
-import { useUser, useForgotPassword } from '@vue-storefront/commercetools';
+import { useUser, useForgotPassword, useCart } from '@vue-storefront/commercetools';
 import { useUiState } from '~/composables';
 
 extend('email', {
@@ -235,7 +235,8 @@ export default {
     const userEmail = ref('');
     const createAccount = ref(false);
     const rememberMe = ref(false);
-    const { register, login, loading, error: userError } = useUser();
+    const { register, login, loading, error: userError ,load} = useUser();
+    const {load:loadCart} = useCart();
     const { request, error: forgotPasswordError, loading: forgotPasswordLoading } = useForgotPassword();
     const currentScreen = ref(SCREEN_REGISTER);
 
@@ -294,7 +295,12 @@ export default {
 
     const handleRegister = async () => handleForm(register)();
 
-    const handleLogin = async () => handleForm(login)();
+    const handleLogin = async () => {
+      
+      await handleForm(login)()
+      await load();
+      await loadCart();
+    };
 
     const handleForgotten = async () => {
       userEmail.value = form.value.username;
@@ -327,7 +333,7 @@ export default {
       SCREEN_LOGIN,
       SCREEN_REGISTER,
       SCREEN_THANK_YOU,
-      SCREEN_FORGOTTEN
+      SCREEN_FORGOTTEN,
     };
   }
 };
@@ -338,6 +344,9 @@ export default {
 .modal {
   --modal-index: 3;
   --overlay-z-index: 3;
+}
+.sf-button{
+  background-color: #5F4BA0;
 }
 .form {
   margin-top: var(--spacer-sm);

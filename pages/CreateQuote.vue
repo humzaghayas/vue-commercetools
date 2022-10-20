@@ -209,6 +209,9 @@
                 // console.log("DAta:: "+JSON.stringify(data));
                 // return;
 
+                // const { data } = await this.$vsf.$ct.api.getMe();
+                // console.log("Get Me:: "+JSON.stringify(data));
+                // return;
                 this.successMessage='';
                 this.errorMessage='';
                 this.showButtons = false;

@@ -6,11 +6,16 @@
       :isNavVisible="isMobileMenuOpen"
     >
       <!-- TODO: add mobile view buttons after SFUI team PR -->
+      
       <template #logo>
+        <div id="dr-logo">
         <nuxt-link :to="localePath('/')" class="sf-header__logo">
-          <SfImage src="/icons/logo.svg" alt="Vue Storefront Next" class="sf-header__logo-image"/>
+          <!-- <SfImage src="/icons/logo.svg" alt="Vue Storefront Next" class="sf-header__logo-image"/> -->
+          <SfImage src="/icons/DrReddyLogo.png" alt="Vue Storefront Next" class="sf-header__logo-image dr-logo"/>
         </nuxt-link>
+         </div>
       </template>
+     
       <template #navigation>
         <HeaderNavigation :isMobile="isMobile" />
       </template>
@@ -44,7 +49,7 @@
             class="sf-button--pure sf-header__action"
             aria-label="Toggle cart sidebar"
             @click="toggleCartSidebar"
-          >
+          ><!--toggleCartSidebar-->
             <SfIcon
               class="sf-header__icon"
               icon="empty_cart"
@@ -227,6 +232,14 @@ export default {
       isMobileMenuOpen,
       removeSearchResults
     };
+  },
+  methods:{
+
+    async test(){
+      const profile = await this.$vsf.$ct.api.getMe({ customer: true }, {});
+      //context.setCart(profile.data.me.activeCart);
+      console.log('Profike data :: '+JSON.stringify(profile));
+    }
   }
 };
 </script>
@@ -238,9 +251,25 @@ export default {
     --header-padding: 0;
   }
   &__logo-image {
-    height: 100%;
+     height: 100%;
+    // width: 188px;
+    // height: 51px;
   }
 }
+ #dr-logo{
+::v-deep {
+ 
+  .dr-logo{
+      width: 188px;
+    height: 51px;
+  }
+  .sf-image{
+  width: 188px;
+    height: 51px;
+  }
+  
+}
+ }
 .header-on-top {
   z-index: 2;
 }

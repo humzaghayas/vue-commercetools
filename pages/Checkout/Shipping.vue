@@ -233,6 +233,8 @@
         </div>
       </div>
     </form>
+
+    isAuthenticated  ::{{isAuthenticated}}
   </ValidationObserver>
 </template>
 
@@ -282,7 +284,7 @@ export default {
     const router = useRouter();
     const { $ct: { config } } = useVSFContext();
     const { shipping: address, loading, load, save } = useShipping();
-    const { isAuthenticated } = useUser();
+    const { isAuthenticated ,load:ul,getCurrentUser} = useUser();
     const { shipping: userShipping, load: loadUserShipping, setDefaultAddress } = useUserShipping();
 
     const shippingDetails = ref(address.value || {});
@@ -370,7 +372,11 @@ export default {
     });
 
     onSSR(async () => {
-      await load();
+      // await ul({customQuery:{}});
+      // console.log('loading user12s : ' +JSON.stringify(isAuthenticated));
+      // const cust = await getCurrentUser(true);
+
+      console.log("curr usr  :"+ JSON.stringify(isAuthenticated));
       if (isAuthenticated.value) {
         await loadUserShipping();
       }

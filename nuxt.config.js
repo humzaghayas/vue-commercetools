@@ -1,5 +1,6 @@
 import webpack from 'webpack';
 import theme from './themeConfig';
+import config from './contentful.json';
 
 export default {
   mode: 'universal',
@@ -17,8 +18,9 @@ export default {
     link: [
       {
         rel: 'icon',
-        type: 'image/x-icon',
-        href: '/favicon.ico'
+        type: 'image/png',
+          href: '/favicon.png'
+        // href: '/DrReddyLogo.png'
       }
     ],
     script: []
@@ -129,6 +131,11 @@ export default {
     theme
   },
   build: {
+    extend(config, ctx) {
+      if (ctx.isDev) {
+        config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'
+      }
+    },
     extractCSS: true,
     babel: {
       plugins: [
@@ -173,5 +180,9 @@ export default {
         httpEndpoint: 'https://ms-gateway-f4b4o225iq-ue.a.run.app/graphql',
       },
     },
+  },
+  env: {
+    CTF_SPACE_ID: config.CTF_SPACE_ID,
+    CTF_CDA_ACCESS_TOKEN: config.CTF_CDA_ACCESS_TOKEN,
   }
 };
