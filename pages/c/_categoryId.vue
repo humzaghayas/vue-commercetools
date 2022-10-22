@@ -101,8 +101,35 @@
               :link="localePath(`/p/${productGetters.getId(product)}/${productGetters.getSlug(product)}`)"
               class="products__product-card"
               @click:wishlist="!isInWishlist({ product }) ? addItemToWishlist({ product }) : removeProductFromWishlist(product)"
-              @click:add-to-cart="addToCart({ product, quantity: 1 })"
-            />
+              @click:add-to-cart="addToCart({ product, quantity: 1,selectedChannel })"
+            >
+
+
+                 <!-- <template #price> 
+                  <div v-if="productPrices != null"> {{productPrices[productGetters.getId(product)]}}</div>
+                </template>  -->
+
+                <template #price>
+                  
+
+                  
+
+                    <div v-if="productPrices != null">
+                      <div > Get Prices</div>
+                      <select v-model="selectedChannel[productGetters.getId(product)]" 
+                          v-if=" productPrices[productGetters.getId(product)]" >
+                        <option  v-for="price in productPrices[productGetters.getId(product)].variants" 
+                          :key="price.varSku" 
+                          :value="price.varSku">
+                            ${{price.amount}}
+                        </option>
+
+                      </select>
+                  </div>
+              </template>
+
+
+            </SfProductCard>
           </transition-group>
           <transition-group
             v-else
@@ -219,6 +246,7 @@ import cacheControl from './../../helpers/cacheControl';
 import CategoryPageHeader from '~/components/CategoryPageHeader';
 
 import { CategorySearch } from '@vue-storefront/commercetools-api';
+import { pid } from 'process';
 
 // TODO(addToCart qty, horizontal): https://github.com/vuestorefront/storefront-ui/issues/1606
 export default {
@@ -227,6 +255,11 @@ export default {
     'max-age': 60,
     'stale-when-revalidate': 5
   }),
+  data(){
+    return {
+      productPrices:null,
+      selectedChannel:{}}
+  },
   setup(props, context) {
     const th = useUiHelpers();
     const uiState = useUiState();
@@ -234,7 +267,6 @@ export default {
     const { result, search, loading, error } = useFacet();
     const { addItem: addItemToWishlist, isInWishlist, removeItem: removeItemFromWishlist, wishlist } = useWishlist();
     
-   
     const route = useRoute();
     const { query, params } = route.value;
     const categoryId  =params.categoryId;
@@ -276,8 +308,20 @@ export default {
       removeItemFromWishlist({ product });
     };
 
-    const addToCart = ({ product, quantity }) => {
-      const { id, sku } = product;
+    const addToCart = ({ product, quantity ,selectedChannel}) => {
+      
+      const { id} = product;
+
+      console.log("selectedChannel :: "+ JSON.stringify(selectedChannel));
+      const sku = selectedChannel[productGetters.getId(product)];
+
+
+      if(sku == null || sku== ''){
+
+        console.log('Price not selected!');
+        return false;
+      }
+      console.log('var sku :' +sku);
       addItemToCart({
         product: { id, sku },
         quantity
@@ -294,7 +338,7 @@ export default {
     return {
       ...uiState,
       th,
-      products,
+     products,
       categoryTree,
       loading,
       productGetters,
@@ -306,15 +350,77 @@ export default {
       isInWishlist,
       addToCart,
       isInCart,
-      productsQuantity
+      productsQuantity,
+      search,
+      result
     };
   },
-  // async asyncData({ app, params ,loading,$vsf}){
-  //   const data= await $vsf.$ct.api.getFacetProductProjection({page:0,perPage:5});
+  methods:{
 
-  //   console.log('data : '+JSON.stringify(data));
+    // async getProductPrices(){
+
+    //   console.log('Watch!');
+
+    //   if(this.products == null){
+    //     return false;
+    //   }
+      
+    //   const priceList = [{amount:200,channelName:"RC Shop",channelKey:2000}];//this.$vsf.$ct.api.getProductPricesById({ customer: true }, {});
+    //   for (var i=0 ; i< this.products.length ; i++){
+    //     let p = this.products[i];
+    //     this.productPrices[this.productGetters.getId(p)] = priceList;
+    //   }
+
+    //   return false;
+    // }
+    async testIt(){
+      console.log(this.selectedChannel);
+    }
+  },
+  async mounted(){
+       console.log('mounted!'+ JSON.stringify(this.products))
+
+        const categoryId = this.$route.params.categoryId;
+
+        await this.search({
+          categorySlug: categoryId,
+          itemsPerPage: 10,
+          sort:'latest',
+          filters: { },
+        });
+
+
+        console.log('this.result.value :: '+JSON.stringify(this.result))
+        this.products=this.result.data;
+
+        //this.productPrices={};
+        const ids = this.products.map(p => {return this.productGetters.getId(p)} );
+        console.log("priceList :: "+ JSON.stringify(ids));
+        const priceList = await this.$vsf.$ct.api.getProductPricesByIds({ ids});
+        console.log("priceList :: "+ JSON.stringify(priceList));
+
+        let pPrices = {};
+        let sChannels = {};
+        for (var i=0 ; i< priceList.prices.length ; i++){
+          let p = priceList.prices[i];
+          const pId = p.productId;
+          pPrices[pId] = p;
+          sChannels[pId]=null;
+        }
+
+        this.productPrices = pPrices;
+        this.selectedChannel = sChannels;
+
+        return false;
     
-  // },
+  },
+  watch:{
+      // if(!this.$apollo.queries.quotes.loading){
+      //   this.getCartsStatuses(this.quotes);
+      // }
+
+      // products:'getProductPrices'
+    },
   components: {
     CategoryPageHeader,
     SfButton,

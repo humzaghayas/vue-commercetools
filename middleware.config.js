@@ -4,6 +4,7 @@ const {getMe} =require( './services/api/getMe');
 const {saveShippingAddressQuote} =require( './services/api/saveShippingAddressQuote');
 const {getCartsStatuses} =require( './services/api/getCartsStatuses');
 const {customQueries} =require( './custom-queries');
+const {getProductPricesByIds}=require( './services/api/getProductPricesByIds');
 
 module.exports = {
   integrations: {
@@ -19,6 +20,7 @@ module.exports = {
             async getMe(context, params) { return getMe(context,params); },
             async saveShippingAddressQuote(context, params) { return saveShippingAddressQuote(context,params); },
             async getCartsStatuses(context, params) { return getCartsStatuses(context,params); },
+            async getProductPricesByIds(context, params) { return getProductPricesByIds(context,params); },
           }
         }
       ],
