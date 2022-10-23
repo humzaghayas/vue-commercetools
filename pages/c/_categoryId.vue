@@ -40,8 +40,9 @@
                         :label="cat.label"
                       >
                         <template #label>
+                          
                           <nuxt-link
-                            :to="localePath(th.getCatLink(cat))"
+                            :to="localePath(`/c/${cat.id}`)"
                             :class="cat.isCurrent ? 'sidebar--cat-selected' : ''"
                           >
                             All
@@ -394,8 +395,15 @@ export default {
         this.products=this.result.data;
 
         //this.productPrices={};
+
+        if (!this.products || this.products.length <=0){
+          return {};
+        }
+
         const ids = this.products.map(p => {return this.productGetters.getId(p)} );
         console.log("priceList :: "+ JSON.stringify(ids));
+
+        
         const priceList = await this.$vsf.$ct.api.getProductPricesByIds({ ids});
         console.log("priceList :: "+ JSON.stringify(priceList));
 

@@ -29,9 +29,10 @@ const categorySearch = async (context, params, customQuery) => {
     fetchPolicy: 'no-cache'
   });
 
-  const v ={data:{
+  const v ={data:{id: request.data.categories.results[0].id,
     categorySearch:request.data.categories}
   }
+  
   return v;
 };
 

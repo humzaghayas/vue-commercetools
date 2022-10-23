@@ -7,6 +7,7 @@ query CategorySearch($where:String,$locale:Locale,$limit:Int,$offset:Int){
     total
     offset
     results{
+      id
     	slug(locale:$locale)
       name(locale:$locale)
       description(locale:$locale)
