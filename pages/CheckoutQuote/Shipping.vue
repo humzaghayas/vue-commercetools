@@ -1,5 +1,5 @@
 <template>
-  <ValidationObserver v-slot="{ handleSubmit, dirty, reset }">
+  <ValidationObserver v-slot="{ handleSubmit,dirty,reset }">
     <SfHeading
       v-e2e="'shipping-heading'"
       :level="3"
@@ -11,13 +11,17 @@
         handleSubmit(handleAddressSubmit(reset))
       "
     >
-      <!-- <UserShippingAddresses
+
+    <div v-if="shippingAddresses != null">
+      <UserShippingAddresses
         v-e2e="'shipping-addresses'"
         v-if="isAuthenticated && hasSavedShippingAddress"
         v-model="setAsDefault"
         :currentAddressId="currentAddressId || NOT_SELECTED_ADDRESS"
         @setCurrentAddress="handleSetCurrentAddress"
-      /> -->
+        :shippingAddresses="shippingAddresses"
+      />
+    </div>
       <div class="form" v-if="canAddNewAddress">
         <ValidationProvider
           name="firstName"
@@ -290,6 +294,7 @@ export default {
     const {$ct}=useVSFContext();
 
     const shippingDetails = ref( {});
+    let shippingAddresses = ref(null)
     const currentAddressId = ref(NOT_SELECTED_ADDRESS);
 
     const setAsDefault = ref(false);
@@ -298,21 +303,22 @@ export default {
     const isShippingDetailsStepCompleted = ref(false);
 
     const cartId=route.value.query?.quoteId;
+    const customerId=route.value.query?.customerId;
 
-    const canMoveForward = computed(() => !loading.value && shippingDetails.value && Object.keys(shippingDetails.value).length);
+    let canMoveForward = computed(() => !loading.value && shippingDetails.value && Object.keys(shippingDetails.value).length);
 
     const {
       state,
       //loading: loadingShippingProvider
     } = useShippingProvider();
 
-    const hasSavedShippingAddress = computed(() => {
-      if (!isAuthenticated.value || !userShipping.value) {
-        return false;
-      }
-      const addresses = userShippingGetters.getAddresses(userShipping.value);
-      return Boolean(addresses?.length);
-    });
+     let hasSavedShippingAddress = false;// computed(() => {
+    //   if (!isAuthenticated.value || !userShipping.value) {
+    //     return false;
+    //   }
+    //   const addresses = userShippingGetters.getAddresses(userShipping.value);
+    //   return Boolean(addresses?.length);
+    // });
 
     const statesInSelectedCountry = computed(() => {
       if (!shippingDetails.value.country) {
@@ -341,6 +347,9 @@ export default {
       ]
     });
 
+    if(!shippingDetails.value.id){
+      await $ct.api.createMyShippingAddress({shippingDetails:shippingDetails.value});
+    }
 
       // if (addressId !== NOT_SELECTED_ADDRESS && setAsDefault.value) {
       //   const chosenAddress = userShippingGetters.getAddresses(userShipping.value, { id: addressId });
@@ -357,10 +366,11 @@ export default {
       canAddNewAddress.value = true;
     };
 
-    const handleSetCurrentAddress = address => {
+    const handleSetCurrentAddress = (address) => {
       shippingDetails.value = {...address};
       currentAddressId.value = address.id;
       canAddNewAddress.value = false;
+      canMoveForward = false;
       isShippingDetailsStepCompleted.value = false;
     };
 
@@ -399,22 +409,29 @@ export default {
     //   }
     // });
 
-    onMounted(async () => {
-      const shippingAddresses = userShippingGetters.getAddresses(userShipping.value);
+    // onMounted(async () => {
 
-      if (!shippingAddresses || !shippingAddresses.length) {
-        return;
-      }
+    //    const {data}= await $ct.api.getMe({customer:true});
 
-      const hasEmptyShippingDetails = !shippingDetails.value || Object.keys(shippingDetails.value).length === 0;
+    //    const shippingAddres=data.me.customer.shippingAddresses;
 
-      if (hasEmptyShippingDetails) {
-        selectDefaultAddress();
-        return;
-      }
+    //    console.log("shippingAddresses  :: ");//+JSON.stringify(shippingAddresses));
+    //   shippingAddresses =shippingAddres;// userShippingGetters.getAddresses(userShipping.value);
 
-      canAddNewAddress.value = false;
-    });
+    //   hasSavedShippingAddress =true;// (shippingAddres.length > 0);
+    //   // if (!shippingAddres || !shippingAddres.length) {
+    //   //   return;
+    //   // }
+
+    //  // const hasEmptyShippingDetails = !shippingDetails.value || Object.keys(shippingDetails.value).length === 0;
+
+    //   // if (hasEmptyShippingDetails) {
+    //   //   selectDefaultAddress();
+    //   //   return;
+    //   // }
+
+    //   //canAddNewAddress.value = false;
+    // });
 
     return {
       NOT_SELECTED_ADDRESS,
@@ -443,9 +460,37 @@ export default {
 
       isShippingMethodStepCompleted: computed(() => state.value && state.value._status),
       //loadingShippingProvider
-      quoteId:cartId
+      quoteId:cartId,
+      shippingAddresses
     };
   },
+  async mounted() {
+
+    const {data}= await this.$vsf.$ct.api.getMe({customer:true});
+
+    const shippingAddres=data.me.customer.shippingAddresses;
+
+    console.log("shippingAddresses  :: ");//+JSON.stringify(shippingAddresses));
+    this.shippingAddresses =shippingAddres;// userShippingGetters.getAddresses(userShipping.value);
+
+    this.hasSavedShippingAddress =true;// (shippingAddres.length > 0);
+    // if (!shippingAddres || !shippingAddres.length) {
+    //   return;
+    // }
+
+    // const hasEmptyShippingDetails = !shippingDetails.value || Object.keys(shippingDetails.value).length === 0;
+
+    // if (hasEmptyShippingDetails) {
+    //   selectDefaultAddress();
+    //   return;
+    // }
+
+    if(!shippingAddres || !shippingAddres.length || shippingAddres.length == 0){
+      this.canAddNewAddress = true;
+    }else{
+      this.canAddNewAddress = false;
+    }
+}
   // async asyncData({ app, params,query ,loading,$vsf}){
 
   //   const cartId= query.quoteId;

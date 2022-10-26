@@ -43,6 +43,9 @@ export default {
     value: {
       type: Boolean,
       required: true
+    },
+    shippingAddresses:{
+      type:Array
     }
   },
   components: {
@@ -50,19 +53,24 @@ export default {
     SfAddressPicker,
     UserShippingAddress
   },
-  setup (_, { emit }) {
+  setup (props, { emit }) {
     const { shipping: userShipping } = useUserShipping();
 
     const setCurrentAddress = async (addressId) => {
-      const selectedAddress = userShippingGetters.getAddresses(userShipping.value, { id: addressId });
+
+      console.log('props.shippingAddresses0:: ' + JSON.stringify(props.shippingAddresses));
+      const selectedAddress = props.shippingAddresses.filter(sa => 
+        sa.id == addressId) ;//userShippingGetters.getAddresses(userShipping.value, { id: addressId });
+
+        console.log(selectedAddress);
       if (!selectedAddress || !selectedAddress.length) {
         return;
       }
-      emit('setCurrentAddress', selectedAddress[0]);
+      emit('setCurrentAddress', selectedAddress[0],props.shippingAddresses);
     };
 
     return {
-      shippingAddresses: [],//userShippingGetters.getAddresses(userShipping.value),
+      //shippingAddresses: [],//userShippingGetters.getAddresses(userShipping.value),
       setCurrentAddress,
       userShippingGetters
     };

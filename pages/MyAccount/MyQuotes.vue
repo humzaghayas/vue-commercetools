@@ -350,10 +350,10 @@ import { onSSR, useVSFContext, vsfRef } from '@vue-storefront/core';
           console.log('statusess 123:: '+JSON.stringify(this.quoteCartStatus));
           return false;
         },
-        async createOrder(quoteId){
+        async createOrder(quoteId,customerId){
           this.$router.push({
-            path:'/checkoutquote',
-            query: { quoteId}});
+            path:'/checkoutquote/shipping',
+            query: { quoteId,customerId}});
 
             return false;
         },

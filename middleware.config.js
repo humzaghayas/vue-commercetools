@@ -5,6 +5,7 @@ const {saveShippingAddressQuote} =require( './services/api/saveShippingAddressQu
 const {getCartsStatuses} =require( './services/api/getCartsStatuses');
 const {customQueries} =require( './custom-queries');
 const {getProductPricesByIds}=require( './services/api/getProductPricesByIds');
+const {createMyShippingAddress}=require( './services/api/createMyShippingAddress');
 
 module.exports = {
   integrations: {
@@ -21,6 +22,7 @@ module.exports = {
             async saveShippingAddressQuote(context, params) { return saveShippingAddressQuote(context,params); },
             async getCartsStatuses(context, params) { return getCartsStatuses(context,params); },
             async getProductPricesByIds(context, params) { return getProductPricesByIds(context,params); },
+            async createMyShippingAddress(context, params) { return createMyShippingAddress(context,params); },
           }
         }
       ],

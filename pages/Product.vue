@@ -24,10 +24,29 @@
           />
         </div>
         <div class="product__price-and-rating">
-          <SfPrice
+          <!-- <SfPrice
             :regular="$n(productGetters.getPrice(product).regular, 'currency')"
             :special="productGetters.getPrice(product).special && $n(productGetters.getPrice(product).special, 'currency')"
-          />
+          /> -->
+
+
+          <div v-if="productPrices != null">
+
+              <SfButton class="sf-button--text" @click="showPrices = !showPrices;selectedChannel[productId] = null;">{{ $t('Prices') }}</SfButton>
+              <div v-show="showPrices">
+                <SfRadio
+                  v-e2e="'procer-option'"
+                  name="Prices"
+                  v-for="price in productPrices[productId].variants"
+                  :key="price.varSku"
+                  :label="$t(price.shop_name +' - $' +price.amount)"
+                  value="price.varSku"
+                  @input="setSelectedPrice(price.varSku,selectedChannel)"
+                />
+            </div>
+          </div>
+
+
           <div>
             <div class="product__rating">
               <SfRating
@@ -45,7 +64,7 @@
           <p class="product__description desktop-only">
             {{ description }}
           </p>
-          <SfButton class="sf-button--text desktop-only product__guide">
+          <!-- <SfButton class="sf-button--text desktop-only product__guide">
             {{ $t('Size guide') }}
           </SfButton>
           <SfSelect
@@ -74,7 +93,7 @@
               class="product__color"
               @click="updateFilter({ color: color.value })"
             />
-          </div>
+          </div> -->
 
           <div
             class="product__delivery"
@@ -121,7 +140,7 @@
             :disabled="loading"
             :canAddToCart="stock > 0"
             class="product__add-to-cart"
-            @click="addToCart"
+            @click="addToCart(selectedChannel)"
           />
         </div>
 
@@ -182,7 +201,7 @@
       </div>
     </div>
 
-    <LazyHydrate when-visible>
+    <!-- <LazyHydrate when-visible>
       <RelatedProducts
         :products="relatedProducts"
         :loading="relatedLoading"
@@ -192,7 +211,7 @@
 
     <LazyHydrate when-visible>
       <InstagramFeed />
-    </LazyHydrate>
+    </LazyHydrate> -->
 
   </div>
 </template>
@@ -270,6 +289,8 @@ export default {
     const selectedDelivery = ref(null);
     const setSelectedDelivery = option => selectedDelivery.value = option;
 
+    const setSelectedPrice = (option,selectedChannel) => selectedChannel[productId] = option;
+
     const selectedChannel = computed(() => {
       if (selectedDelivery.value !== 'collect') return null;
       const selected = channels.value.find((item) => (item.channel.id === channelId.value));
@@ -280,11 +301,23 @@ export default {
       } : null;
     });
 
-    const addToCart = () => {
+    const addToCart = (selectedChannel) => {
+
+      console.log("selectedChannel :: "+ JSON.stringify(selectedChannel));
+      const sku = selectedChannel[productId];
+
+      console.log('sku :: '+ JSON.stringify(sku));
+
+      if(sku == null || sku== ''){
+        console.log('Price not selected!');
+        alert("Please Select a Price!")
+        return false;
+      }
+
       addItem({
         product: {
           id: product.value.id,
-          sku: product.value.sku
+          sku
         },
         quantity: parseInt(qty.value),
         customQuery: selectedChannel.value
@@ -299,6 +332,8 @@ export default {
       big: { url: img.big },
       alt: product.value._name || product.value.name
     })));
+
+    const productId= route.value.params.id;
 
     onSSR(async () => {
       await search({ id: route.value.params.id });
@@ -338,7 +373,10 @@ export default {
       selectedChannel,
       selectedStore,
       selectedDelivery,
-      setSelectedDelivery
+      setSelectedDelivery,
+      search,
+      productId,
+      setSelectedPrice
     };
   },
   components: {
@@ -409,8 +447,43 @@ export default {
             link: '#'
           }
         }
-      ]
+      ],
+      productPrices:null,
+      selectedChannel:{},
+      showPrices:false
     };
+  },
+    async mounted(){
+       console.log('mounted!'+ JSON.stringify(this.products))
+
+        const productId = this.$route.params.id;
+
+        await this.search({ id: productId });
+
+        const ids =[];
+        ids.push(productId);
+        console.log("priceList :: "+ JSON.stringify(ids));
+
+        
+        const priceList = await this.$vsf.$ct.api.getProductPricesByIds({ ids});
+        console.log("priceList :: "+ JSON.stringify(priceList));
+
+        let pPrices = {};
+        let sChannels = {};
+        for (var i=0 ; i< priceList.prices.length ; i++){
+          let p = priceList.prices[i];
+          const pId = p.productId;
+          pPrices[pId] = p;
+          sChannels[pId]=null;
+        }
+
+        this.productPrices = pPrices;
+        this.selectedChannel = sChannels;
+
+        console.log(" this.selectedChannel :: "+ JSON.stringify( this.selectedChannel));
+
+        return false;
+    
   }
 };
 </script>

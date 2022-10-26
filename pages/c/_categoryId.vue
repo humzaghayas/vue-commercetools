@@ -112,20 +112,30 @@
 
                 <template #price>
                   
-
-                  
-
                     <div v-if="productPrices != null">
-                      <div > Get Prices</div>
-                      <select v-model="selectedChannel[productGetters.getId(product)]" 
-                          v-if=" productPrices[productGetters.getId(product)]" >
-                        <option  v-for="price in productPrices[productGetters.getId(product)].variants" 
-                          :key="price.varSku" 
-                          :value="price.varSku">
-                            ${{price.amount}}
-                        </option>
+                      <SfButton class="sf-button--text" @click="showPrices[productGetters.getId(product)] = !showPrices[productGetters.getId(product)];selectedChannel[productGetters.getId(product)] = null;">{{ $t('Prices') }}</SfButton>
 
-                      </select>
+                      <div v-show="showPrices[productGetters.getId(product)]">
+                        <!-- <select v-model="selectedChannel[productGetters.getId(product)]" 
+                            v-if=" productPrices[productGetters.getId(product)]" >
+                          <option  v-for="price in productPrices[productGetters.getId(product)].variants" 
+                            :key="price.varSku" 
+                            :value="price.varSku">
+                              ${{price.amount}}
+                          </option>
+
+                        </select> -->
+                        <SfRadio
+                          v-e2e="'procer-option'"
+                          name="Prices"
+                          
+                          v-for="price in productPrices[productGetters.getId(product)].variants"
+                          :key="price.varSku"
+                          :label="$t(price.shop_name +' - $' +price.amount)"
+                          value="price.varSku"
+                          @input="setSelectedPrice(price.varSku,selectedChannel,productGetters.getId(product))"
+                        />
+                      </div>
                   </div>
               </template>
 
@@ -236,7 +246,8 @@ import {
   SfBreadcrumbs,
   SfLoader,
   SfColor,
-  SfProperty
+  SfProperty,
+SfRadio
 } from '@storefront-ui/vue';
 import { computed, ref,useRoute} from '@nuxtjs/composition-api';
 import { useCart, useWishlist, productGetters, useFacet, facetGetters, wishlistGetters } from '@vue-storefront/commercetools';
@@ -259,7 +270,9 @@ export default {
   data(){
     return {
       productPrices:null,
-      selectedChannel:{}}
+      selectedChannel:{},
+      showPrices:{},
+    }
   },
   setup(props, context) {
     const th = useUiHelpers();
@@ -309,6 +322,8 @@ export default {
       removeItemFromWishlist({ product });
     };
 
+    const setSelectedPrice = (option,selectedChannel,prdId) => selectedChannel[prdId] = option;
+
     const addToCart = ({ product, quantity ,selectedChannel}) => {
       
       const { id} = product;
@@ -320,9 +335,11 @@ export default {
       if(sku == null || sku== ''){
 
         console.log('Price not selected!');
+        alert("Please Select a Price!")
         return false;
       }
       console.log('var sku :' +sku);
+
       addItemToCart({
         product: { id, sku },
         quantity
@@ -353,7 +370,8 @@ export default {
       isInCart,
       productsQuantity,
       search,
-      result
+      result,
+      setSelectedPrice
     };
   },
   methods:{
@@ -409,15 +427,18 @@ export default {
 
         let pPrices = {};
         let sChannels = {};
+        let sPrices = {};
         for (var i=0 ; i< priceList.prices.length ; i++){
           let p = priceList.prices[i];
           const pId = p.productId;
           pPrices[pId] = p;
           sChannels[pId]=null;
+          sPrices[pId] = false;
         }
 
         this.productPrices = pPrices;
         this.selectedChannel = sChannels;
+        this.showPrices = sPrices;
 
         return false;
     
@@ -447,8 +468,9 @@ export default {
     SfColor,
     SfHeading,
     SfProperty,
-    LazyHydrate
-  }
+    LazyHydrate,
+    SfRadio
+}
 };
 </script>
 

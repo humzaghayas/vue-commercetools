@@ -154,18 +154,18 @@
         </div>
       </div>
   
-      <LazyHydrate when-visible>
+      <!-- <LazyHydrate when-visible>
         <RelatedProducts
           :products="relatedProducts"
           :loading="relatedLoading"
           title="Match it with"
         />
-      </LazyHydrate>
+      </LazyHydrate> -->
   
-      <LazyHydrate when-visible>
+      <!-- <LazyHydrate when-visible>
         <InstagramFeed />
       </LazyHydrate>
-  
+   -->
     </div>
   </template>
   <script>
@@ -275,7 +275,7 @@
   
       onSSR(async () => {
         await search({ id: route.value.params.productId });
-        await searchRelatedProducts({ catId: [categories.value[0]], limit: 8 });
+       // await searchRelatedProducts({ catId: [categories.value[0]], limit: 8 });
         await searchReviews({ productId: route.value.params.productId });
       });
   
@@ -299,7 +299,7 @@
         reviewGetters,
         averageRating: computed(() => productGetters.getAverageRating(product.value)),
         totalReviews: computed(() => productGetters.getTotalReviews(product.value)),
-        relatedProducts: computed(() => productGetters.getFiltered(relatedProducts.value, { master: true })),
+       // relatedProducts: computed(() => productGetters.getFiltered(relatedProducts.value, { master: true })),
         relatedLoading,
         options,
         qty,
@@ -382,9 +382,51 @@
               link: '#'
             }
           }
-        ]
+        ],
+        productPrices:null,
+        selectedChannel:{}
       };
-    }
+    },
+    async mounted(){
+       console.log('mounted!'+ JSON.stringify(this.products))
+
+        const productId = this.$route.params.productId;
+
+        await search({ id: productId });
+
+
+        console.log('this.result.value :: '+JSON.stringify(this.result))
+        this.products=this.result.data;
+        this.product = this.priducts[0]; 
+
+        //this.productPrices={};
+
+        if (!this.products || this.products.length <=0){
+          return {};
+        }
+
+        const ids = this.productGetters.getId(product);
+        console.log("priceList :: "+ JSON.stringify(ids));
+
+        
+        const priceList = await this.$vsf.$ct.api.getProductPricesByIds({ ids});
+        console.log("priceList :: "+ JSON.stringify(priceList));
+
+        let pPrices = {};
+        let sChannels = {};
+        for (var i=0 ; i< priceList.prices.length ; i++){
+          let p = priceList.prices[i];
+          const pId = p.productId;
+          pPrices[pId] = p;
+          sChannels[pId]=null;
+        }
+
+        this.productPrices = pPrices;
+        this.selectedChannel = sChannels;
+
+        return false;
+    
+  }
   };
   </script>
   
