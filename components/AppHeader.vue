@@ -49,7 +49,7 @@
             class="sf-button--pure sf-header__action"
             aria-label="Toggle cart sidebar"
             @click="toggleCartSidebar"
-          ><!--toggleCartSidebar-->
+          >
             <SfIcon
               class="sf-header__icon"
               icon="empty_cart"
@@ -232,14 +232,6 @@ export default {
       isMobileMenuOpen,
       removeSearchResults
     };
-  },
-  methods:{
-
-    async test(){
-      const profile = await this.$vsf.$ct.api.getMe({ customer: true }, {});
-      //context.setCart(profile.data.me.activeCart);
-      console.log('Profike data :: '+JSON.stringify(profile));
-    }
   }
 };
 </script>

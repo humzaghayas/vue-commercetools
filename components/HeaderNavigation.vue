@@ -78,9 +78,24 @@ export default {
     /* font-family: "DRLCircular-Black"; */
     font-family: sans-serif;
     margin: auto;
-    font-weight: 550;
+    font-weight: 700;
     font-size: 16px;
+    --link-color: #413568;
+    word-break: keep-all;
+    white-space:nowrap;
     }
+   .nuxt-link-exact-active{
+     border-bottom: 2px solid #5f4ba0;;
+    // border-color: hotpink;
+    //  border-radius: 10px;
+   }
+    .nuxt-link-active:hover{
+        border-bottom: 2px solid #5f4ba0;;
+    }
+   .sf-header-navigation-item:hover > *:not(.sf-mega-menu) {
+    --header-navigation-item-color:#5f4ba0;;
+    --header-navigation-item-border-color: #413568;
+}
   }
 }
 .sf-header-navigation-item {

@@ -57,7 +57,7 @@
             </transition-group>
           </div>
         </div>
-        <div v-else key="empty-cart" class="empty-cart">
+        <div v-else key="empty-cart" class="empty-cart" id="empty-cart">
           <div class="empty-cart__banner">
             <SfImage
               alt="Empty bag"
@@ -106,7 +106,7 @@
                 {{ $t('Create quote') }}
             </SfButton>
           </div>
-          <div v-else>
+          <div v-else id="empty-cart-button">
             <SfButton
               class="sf-button--full-width color-primary"
               @click="toggleCartSidebar"
@@ -190,6 +190,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#empty-cart{
+  ::v-deep{
+.sf-heading__title {
+    color: #5F4BA0;
+}
+  }
+
+}
+#empty-cart-button{
+   ::v-deep{
+.sf-button.color-primary {
+    --button-background: #5F4BA0;
+}
+  }
+
+}
 #cart {
   --sidebar-z-index: 3;
   --overlay-z-index: 3;

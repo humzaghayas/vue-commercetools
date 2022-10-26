@@ -35,7 +35,7 @@ const createMyShippingAddress = async (context, params, customQuery) => {
         "lastName":shippingDetails.lastName,
         "streetName":shippingDetails.streetName,
         "streetNumber":shippingDetails.streetNumber,
-        "postalCode":shippingDetails.zipCode,
+        "postalCode":shippingDetails.postalCode,
         "city":shippingDetails.city,
         "state":shippingDetails.state,
         "country":shippingDetails.country,

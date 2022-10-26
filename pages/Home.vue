@@ -6,6 +6,9 @@
           v-for="(hero, i) in heroes"
           :key="i"
           :title="hero.title"
+          :description="hero.description"
+          :button-text="hero.buttonText"
+          :link="hero.buttonLink"
           :subtitle="hero.subtitle"
           :background="hero.background"
           :image="hero.image"
@@ -25,7 +28,7 @@
     </LazyHydrate>
 
     <LazyHydrate when-visible>
-      <SfBannerGrid :banner-grid="1" class="banner-grid">
+      <SfBannerGrid :banner-grid="1" class="banner-grid" id="home-banner-grid">
         <template v-for="item in banners" v-slot:[item.slot]>
           <SfBanner
             :key="item.slot"
@@ -35,8 +38,9 @@
             :button-text="item.buttonText"
             link=""
             :image="item.image"
-            :class="item.class"
+            
           />
+          <!-- :class="item.class" -->
         </template>
       </SfBannerGrid>
     </LazyHydrate>
@@ -51,6 +55,23 @@
       </div>
     </LazyHydrate>
     <LazyHydrate when-visible>
+      <SfBannerGrid :banner-grid="1" class="banner-grid" id="home-banner-grid">
+        <template v-for="item in therapeutics" v-slot:[item.slot]>
+          <SfBanner
+            :key="item.slot"
+            :title="item.title"
+            :subtitle="item.subtitle"
+            :description="item.description"
+            :button-text="item.buttonText"
+            link=""
+            :image="item.image"
+            
+          />
+          <!-- :class="item.class" -->
+        </template>
+      </SfBannerGrid>
+    </LazyHydrate>
+    <!-- <LazyHydrate when-visible>
         <SfCarousel class="carousel" :settings="{ peek: 16, breakpoints: { 1023: { peek: 0, perView: 2 } } }">
           <template #prev="{go}">
             <SfArrow
@@ -66,7 +87,7 @@
               @click="go('next')"
             />
           </template>
-          <SfCarouselItem class="carousel__item" v-for="(banner, i) in banners" :key="i">
+          <SfCarouselItem class="carousel__item" v-for="(banner, i) in banners" :key="i" id="home-carousel-one">
             <SfCard
               :image=banner.image
               :imageWidth="288"
@@ -79,11 +100,11 @@
             />
           </SfCarouselItem>
         </SfCarousel>
-    </LazyHydrate>
+    </LazyHydrate> -->
 
     <LazyHydrate when-visible>
       <div class="similar-products">
-        <SfHeading title="Match with it" :level="2"/>
+        <SfHeading title="Products" :level="2"/>
         <nuxt-link :to="localePath('/c/women')" class="smartphone-only">
           {{ $t('See all') }}
         </nuxt-link>
@@ -106,7 +127,8 @@
               @click="go('next')"
             />
           </template>
-          <SfCarouselItem class="carousel__item" v-for="(product, i) in products" :key="i">
+        
+          <SfCarouselItem class="carousel__item" v-for="(product, i) in products" :key="i" id="home-carousel-two">
             <SfProductCard
               :title="product.title"
               :image="product.image"
@@ -120,6 +142,7 @@
               @click:wishlist="toggleWishlist(i)"
             />
           </SfCarouselItem>
+        
         </SfCarousel>
     </LazyHydrate>
 
@@ -361,10 +384,14 @@ export default {
         'content_type': 'middleBanner',
         order: '-sys.createdAt'
     }),
+    client.getEntries({
+        'content_type': 'middleBanner',
+        order: '-sys.createdAt'
+    }),
 
         
     ]).then(
-      ([ctfHeroes, ctfBanners, middleBanners]) =>{
+      ([ctfHeroes, ctfBanners, middleBanners,ourTherapeutic]) =>{
 
         // console.log("Heroes " + JSON.stringify(ctfHeroes.items));
         // console.log("middleBanner " + JSON.stringify(middleBanners.items));
@@ -372,16 +399,18 @@ export default {
         const banners = [];
         const heroes  = [];
         const products = [];
+        const therapeutics = [];
         const jfu = ctfBanners.items.filter(item=>item.fields.title.includes("Just for you"));
         const ctfHItems = ctfHeroes.items;
-        const ctfMiddleBanners = middleBanners.items;
+        const ctfMiddleBanners = middleBanners.items.filter(item=>item.fields.subtitle.includes("WWA"));
+        const ctfOurTherapeutic = ourTherapeutic.items.filter(item=>item.fields.subtitle.includes("therapeutics"));
         // console.log("JFU:"+JSON.stringify(jfu));
 
         for(let i in jfu){
           const p ={
             title: jfu[i].fields.primaryText.content[0].content[0].value,
             image: jfu[i].fields.media?.fields?.file?.url,
-            price: { regular: '50.00 $' },
+            price: { regular: '' },
             rating: { max: 5, score: 4 },
             isInWishlist: true
           }
@@ -402,10 +431,27 @@ export default {
           banners.push(b);
         }
 
+        for(let i in ctfOurTherapeutic){
+          const t = {
+                slot: ctfOurTherapeutic[i].fields.slot,
+                // subtitle: ctfMiddleBanners[i].fields.subtitle,
+                title: ctfOurTherapeutic[i].fields.title,
+                description:ctfOurTherapeutic[i].fields.description,
+                buttonText: ctfOurTherapeutic[i].fields.buttonText,
+                image: ctfOurTherapeutic[i].fields.image?.fields?.file?.url,
+                class: ctfOurTherapeutic[i].fields.class,//'sf-banner--slim banner__tshirt',
+                // link: ctfMiddleBanners[i].fields.image?.fields?.file?.url
+          }
+          therapeutics.push(t);
+        }
+
         for(let i in ctfHItems){
           const h ={
             title: ctfHItems[i].fields.title,
             subtitle: ctfHItems[i].fields.subtitle,
+            description: ctfHItems[i].fields.description,
+            buttonText: ctfHItems[i].fields.buttonText,
+            buttonLink: ctfHItems[i].fields.buttonLink,
             background: '#eceff1',
             image: ctfHItems[i].fields.image?.fields.file.url
           }
@@ -419,7 +465,8 @@ export default {
          return {
           heroes,
           banners,
-          products
+          products,
+          therapeutics
          }
 
       }
@@ -430,6 +477,99 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#home{
+  ::v-deep{ 
+
+    .sf-hero-item__button a{
+      background-color: #f0504b;
+      border-radius: 30px;
+      padding: 20px 40px;
+    }
+  }
+}
+#home-banner-grid{
+  ::v-deep{ 
+ .sf-button.color-secondary {
+    --button-background: #5F4BA0;
+}
+.sf-banner{
+  --banner-wrapper-width:81%;
+  align-items: center;
+  height: 200px;
+}
+.sf-banner__wrapper{
+  align-content: center;
+  align-items: center;
+  width: 60%;
+}
+.sf-banner__wrapper h1{
+  align-items: center;
+  align-content: space-around;
+  margin-left: 46px;
+  
+}
+.sf-button.color-secondary{
+  --button-background:none;
+  border:1px solid white;
+  border-radius: 30px;
+}
+
+.sf-banner-grid__col .sf-banner {
+  opacity: 0.7;
+}
+
+.sf-banner-grid__col .sf-banner:hover {
+    // background: -moz-radial-gradient(center,ellipse cover,rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%);
+    // background: -webkit-radial-gradient(center,ellipse cover,rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%);
+    opacity: 1;
+}
+.sf-banner__title {
+  color: #fff;
+  margin: auto auto auto 0px;
+  width: 100%;
+  line-height: normal;
+  min-height: 26px;
+  font-size: 18px;
+  font-weight: bold;
+
+}
+ }
+}
+#home-carousel-one{
+::v-deep{ 
+ .sf-card__action {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -1.5625rem);
+    background-color: #5F4BA0;
+}
+ }
+}
+#home-carousel-two{
+::v-deep{ 
+ .sf-rating__icon {
+    --icon-size: 0.875rem;
+    --icon-color: #5F4BA0;
+    /* --icon-color: var(--c-primary); */
+    --icon-color-negative: var(--c-gray-variant);
+}
+.sf-rating__icon--negative{
+   --icon-color: var(--c-gray-variant);
+ 
+} 
+.sf-circle-icon{
+  --button-background: #5F4BA0;
+}
+.sf-product-card__image-wrapper{
+  height: 200px;
+}
+.sf-product-card{
+
+}
+
+ }
+}
+
 #home {
   box-sizing: border-box;
   padding: 0 var(--spacer-sm);
@@ -438,13 +578,14 @@ export default {
     padding: 0;
     margin: 0 auto;
   }
+
 }
 
 .hero {
   margin: var(--spacer-xl) auto var(--spacer-lg);
   --hero-item-background-position: center;
   @include for-desktop {
-    margin: var(--spacer-xl) auto var(--spacer-2xl);
+    // margin: var(--spacer-xl) auto var(--spacer-2xl);
   }
   .sf-hero-item {
     &:nth-child(even) {
@@ -460,6 +601,9 @@ export default {
       }
     }
   }
+  .sf-hero-item__wrapper {
+    height: 200px;
+  }
   ::v-deep .sf-hero__control {
     &--right, &--left {
       display: none;
@@ -474,7 +618,7 @@ export default {
     color: var(--c-white);
   }
   @include for-desktop {
-    margin: var(--spacer-2xl) 0;
+    // margin: var(--spacer-2xl) 0;
     ::v-deep .sf-link {
       --button-width: auto;
       text-decoration: none;
@@ -535,5 +679,6 @@ export default {
      transform-origin: center;
   }
 }
+
 
 </style>
