@@ -1,5 +1,5 @@
 <template>
-    <div >
+    <div class="create_quote">
       <div v-if="loading" class="loading">
         </div>
       <div v-else>
@@ -466,7 +466,7 @@
     }
 
     .button {
-      border: 2px solid #04AA6D;
+      border: 2px solid var(--c-primary);
       padding: 10px 20px;
       text-align: center;
       text-decoration: none;
@@ -477,11 +477,11 @@
     }
 
     .button:hover  {
-      background-color: #04AA6D;
+      background-color: var(--c-primary);
     }
 
     .success-message {
-      background-color: green;
+      background-color: var(--c-primary);
       color: white;
     }
 

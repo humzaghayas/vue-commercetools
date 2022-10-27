@@ -96,7 +96,7 @@
               :special-price="productGetters.getPrice(product).special && $n(productGetters.getPrice(product).special, 'currency')"
               :max-rating="5"
               :score-rating="productGetters.getAverageRating(product)"
-              :show-add-to-cart-button="true"
+              :show-add-to-cart-button="false"
               :is-in-wishlist="isInWishlist({ product })"
               :is-added-to-cart="isInCart({ product })"
               :link="localePath(`/p/${productGetters.getId(product)}/${productGetters.getSlug(product)}`)"
@@ -112,19 +112,12 @@
 
                 <template #price>
                   
-                    <div v-if="productPrices != null">
+                  <div></div>
+                    <!-- <div v-if="productPrices != null">
                       <SfButton class="sf-button--text" @click="showPrices[productGetters.getId(product)] = !showPrices[productGetters.getId(product)];selectedChannel[productGetters.getId(product)] = null;">{{ $t('Prices') }}</SfButton>
 
                       <div v-show="showPrices[productGetters.getId(product)]">
-                        <!-- <select v-model="selectedChannel[productGetters.getId(product)]" 
-                            v-if=" productPrices[productGetters.getId(product)]" >
-                          <option  v-for="price in productPrices[productGetters.getId(product)].variants" 
-                            :key="price.varSku" 
-                            :value="price.varSku">
-                              ${{price.amount}}
-                          </option>
-
-                        </select> -->
+                        
                         <SfRadio
                           v-e2e="'procer-option'"
                           name="Prices"
@@ -136,7 +129,7 @@
                           @input="setSelectedPrice(price.varSku,selectedChannel,productGetters.getId(product))"
                         />
                       </div>
-                  </div>
+                  </div> -->
               </template>
 
 

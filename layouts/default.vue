@@ -103,6 +103,11 @@ export default {
   @include for-desktop {
     max-width: 1240px;
     margin: auto;
+//    --c-primary :#74419e;
+  @include generate-color-variants(--_c-purple-primary, #74419e);
+  @include generate-color-variants(--_c-purple-secondary, #bea7d1);
+  @include assign-color-variants(--c-primary, --_c-purple-primary);
+  @include assign-color-variants(--c-primary-variant,--_c-purple-secondary);
   }
 }
 
@@ -116,7 +121,9 @@ html {
   width: auto;
   @include for-mobile {
     overflow-x: hidden;
+    
   }
+  
 }
 body {
   overflow-x: hidden;
