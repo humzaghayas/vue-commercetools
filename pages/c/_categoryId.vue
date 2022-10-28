@@ -26,6 +26,7 @@
               v-e2e="'categories-accordion'"
               :open="activeCategory"
               :show-chevron="true"
+              id="category-page-accordion"
             >
               <SfAccordionItem
                 v-for="(cat, i) in categoryTree && categoryTree.items"
@@ -84,6 +85,7 @@
             name="products__slide"
             tag="div"
             class="products__grid"
+             id="category-products-one"
           >
             <SfProductCard
               v-e2e="'category-product-card'"
@@ -141,6 +143,7 @@
             name="products__slide"
             tag="div"
             class="products__list"
+            id="category-products-two"
           >
             <SfProductCardHorizontal
               v-e2e="'category-product-card'"
@@ -468,6 +471,48 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#category-page-accordion{
+  ::v-deep{
+    .sf-accordion-item__header.is-open {
+    --accordion-item-header-border-width: 0;
+    --accordion-item-header-color:  #5F4BA0;
+    --chevron-color: #5F4BA0;
+    font-weight: 500;
+}
+  }
+}
+#category-products-one{
+::v-deep{
+  .sf-circle-icon{
+  --button-background: #5F4BA0;
+}
+.sf-circle-icon:hover{
+  --button-background: #5F4BA0;
+}
+.sf-button:hover{
+  --button-background: #5F4BA0;
+}
+.color-white{
+    --button-background: #5F4BA0;
+}
+}
+}
+#category-products-two{
+::v-deep{
+  .sf-circle-icon{
+  --button-background: #5F4BA0;
+}
+.sf-circle-icon:hover{
+  --button-background: #5F4BA0;
+}
+.sf-button:hover{
+  --button-background: #5F4BA0;
+}
+.color-white{
+    --button-background: #5F4BA0;
+}
+}
+}
 #category {
   box-sizing: border-box;
   @include for-desktop {

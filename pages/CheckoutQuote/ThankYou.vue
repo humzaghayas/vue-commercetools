@@ -4,10 +4,7 @@
       v-e2e="'thank-you-banner'"
       class="banner"
       title="Thank you for your order!"
-      :image="{
-        mobile: '/thank-you/bannerM.png',
-        desktop: '/thank-you/bannerD.png',
-      }"
+      
     >
       <template #description>
         <div class="banner__order-number">

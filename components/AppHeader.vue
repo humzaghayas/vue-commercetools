@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="header-search-navigation-menu">
     <SfHeader
       class="sf-header--has-mobile-search"
       :class="{'header-on-top': isSearchOpen}"
@@ -61,7 +61,7 @@
           </SfButton>
         </div>
       </template>
-      <template #search>
+      <template #search  >
         <SfSearchBar
           ref="searchBarRef"
           :placeholder="$t('Search for items')"
@@ -73,6 +73,7 @@
           @focus="isSearchOpen = true"
           @keydown.esc="closeSearch"
           v-click-outside="closeSearch"
+       
         >
           <template #icon>
             <SfButton
@@ -237,6 +238,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#header-search-navigation-menu{
+  ::v-deep{
+    .sf-search-bar__input:focus {
+    --search-bar-border-color: blue;
+}
+
+}
+
+}
 .sf-header {
   --header-padding:  var(--spacer-sm);
   @include for-desktop {
