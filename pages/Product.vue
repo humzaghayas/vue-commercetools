@@ -30,7 +30,7 @@
           /> -->
 
 
-          <div v-if="productPrices != null">
+          <!-- <div v-if="productPrices != null">
 
               <SfButton class="sf-button--text" @click="showPrices = !showPrices;selectedChannel[productId] = null;">{{ $t('Prices') }}</SfButton>
               <div v-show="showPrices">
@@ -44,7 +44,11 @@
                   @input="setSelectedPrice(price.varSku,selectedChannel)"
                 />
             </div>
-          </div>
+          </div> -->
+
+          <div v-if="!priceLoading">
+          {{productPrices }}
+        </div>
 
 
           <div>
@@ -61,8 +65,8 @@
           </div>
         </div>
         <div>
-          <p class="product__description desktop-only">
-            {{ description }}
+          <p class="product__description desktop-only" v-html="productGetters.getDescription(product)">
+
           </p>
           <!-- <SfButton class="sf-button--text desktop-only product__guide">
             {{ $t('Size guide') }}
@@ -251,6 +255,7 @@ import {
 import { onSSR } from '@vue-storefront/core';
 import LazyHydrate from 'vue-lazy-hydration';
 import cacheControl from './../helpers/cacheControl';
+import { useProductPrices } from '~/composables';
 
 export default {
   name: 'Product',
@@ -268,6 +273,7 @@ export default {
     const { addItem, loading } = useCart();
     const { reviews: productReviews, search: searchReviews } = useReview('productReviews');
     const { response: stores } = useStore();
+    const {getProductPrices,loading:priceLoading,productPrices}=useProductPrices(route.value.params.id)
 
     // to be added on local useStore factory
     function getSelected(stores) {
@@ -337,6 +343,7 @@ export default {
 
     onSSR(async () => {
       await search({ id: route.value.params.id });
+      await getProductPrices(product.value.sku)
       await searchRelatedProducts({ catId: [categories.value[0]], limit: 8 });
       await searchReviews({ productId: route.value.params.id });
     });
@@ -376,7 +383,9 @@ export default {
       setSelectedDelivery,
       search,
       productId,
-      setSelectedPrice
+      setSelectedPrice,
+      priceLoading,
+      productPrices
     };
   },
   components: {
@@ -448,41 +457,41 @@ export default {
           }
         }
       ],
-      productPrices:null,
+      //productPrices:null,
       selectedChannel:{},
       showPrices:false
     };
   },
     async mounted(){
-       console.log('mounted!'+ JSON.stringify(this.products))
+      //  console.log('mounted!'+ JSON.stringify(this.products))
 
-        const productId = this.$route.params.id;
+      //   const productId = this.$route.params.id;
 
-        await this.search({ id: productId });
+      //   await this.search({ id: productId });
 
-        const ids =[];
-        ids.push(productId);
-        console.log("priceList :: "+ JSON.stringify(ids));
+      //   const ids =[];
+      //   ids.push(productId);
+      //   console.log("priceList :: "+ JSON.stringify(ids));
 
         
-        const priceList = await this.$vsf.$ct.api.getProductPricesByIds({ ids});
-        console.log("priceList :: "+ JSON.stringify(priceList));
+      //   const priceList = await this.$vsf.$ct.api.getProductPricesByIds({ ids});
+      //   console.log("priceList :: "+ JSON.stringify(priceList));
 
-        let pPrices = {};
-        let sChannels = {};
-        for (var i=0 ; i< priceList.prices.length ; i++){
-          let p = priceList.prices[i];
-          const pId = p.productId;
-          pPrices[pId] = p;
-          sChannels[pId]=null;
-        }
+      //   let pPrices = {};
+      //   let sChannels = {};
+      //   for (var i=0 ; i< priceList.prices.length ; i++){
+      //     let p = priceList.prices[i];
+      //     const pId = p.productId;
+      //     pPrices[pId] = p;
+      //     sChannels[pId]=null;
+      //   }
 
-        this.productPrices = pPrices;
-        this.selectedChannel = sChannels;
+      //   this.productPrices = pPrices;
+      //   this.selectedChannel = sChannels;
 
-        console.log(" this.selectedChannel :: "+ JSON.stringify( this.selectedChannel));
+      //   console.log(" this.selectedChannel :: "+ JSON.stringify( this.selectedChannel));
 
-        return false;
+      //   return false;
     
   }
 };

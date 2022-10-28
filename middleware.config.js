@@ -48,8 +48,8 @@ module.exports = {
         currency: 'USD',
         country: 'US',
         languageMap: {
-          en: ['en', 'de'],
-          de: ['de', 'en']
+          en: ['en', 'de','en-US'],
+          de: ['de', 'en','en-US']
         }
       }
     }

@@ -86,7 +86,29 @@ export default {
     '@vue-storefront/middleware/nuxt',
     '@nuxt/http',
     '@nuxtjs/apollo'
-  ],
+  ],  
+  http: {
+    baseURL: 'http://localhost:3000', // Used as fallback if no runtime config is provided
+  },
+
+  publicRuntimeConfig: {
+    http: {
+      browserBaseURL: process.env.BROWSER_BASE_URL
+    }
+  },
+
+  privateRuntimeConfig: {
+    http: {
+      baseURL: process.env.BASE_URL
+    }
+  },
+  http: {
+    proxy: true // Can be also an object with default options
+  },
+
+  proxy: {
+    '/product-prices/': 'http://localhost:8080'
+  },
   i18n: {
     currency: 'USD',
     country: 'US',
