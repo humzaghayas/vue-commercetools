@@ -6,6 +6,7 @@ const {getCartsStatuses} =require( './services/api/getCartsStatuses');
 const {customQueries} =require( './custom-queries');
 const {getProductPricesByIds}=require( './services/api/getProductPricesByIds');
 const {createMyShippingAddress}=require( './services/api/createMyShippingAddress');
+const {addToCartWithMiraklPrice} = require('./services/api/addToCartWithMiraklPrice');
 
 module.exports = {
   integrations: {
@@ -14,7 +15,7 @@ module.exports = {
       extensions: (extensions) => [
         ...extensions,
         {
-          name: 'extension-name',
+          name: 'customExtensions',
           extendApiMethods: {
             async categorySearch(context, params) { return categorySearch(context,params); },
             async isAdmin(context, params) { return isAdmin(context,params); },
@@ -23,6 +24,7 @@ module.exports = {
             async getCartsStatuses(context, params) { return getCartsStatuses(context,params); },
             async getProductPricesByIds(context, params) { return getProductPricesByIds(context,params); },
             async createMyShippingAddress(context, params) { return createMyShippingAddress(context,params); },
+            async addToCartWithMiraklPrice(context, params) { return addToCartWithMiraklPrice(context,params); },          
           }
         }
       ],

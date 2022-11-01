@@ -1,6 +1,7 @@
 import webpack from 'webpack';
 import theme from './themeConfig';
 import config from './contentful.json';
+import miraklConfig from "./vars.json";
 
 export default {
   mode: 'universal',
@@ -107,7 +108,8 @@ export default {
   },
 
   proxy: {
-    '/product-prices/': 'http://localhost:8080'
+    '/product-prices/': 'http://localhost:8080',
+    '/product-prices-shopIds/': 'http://localhost:8080'
   },
   i18n: {
     currency: 'USD',
@@ -207,5 +209,6 @@ export default {
   env: {
     CTF_SPACE_ID: config.CTF_SPACE_ID,
     CTF_CDA_ACCESS_TOKEN: config.CTF_CDA_ACCESS_TOKEN,
+    MIRAKL_AUTHORIZATION:miraklConfig.MIRAKL_AUTHORIZATION
   }
 };

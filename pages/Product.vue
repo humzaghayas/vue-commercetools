@@ -47,7 +47,22 @@
           </div> -->
 
           <div v-if="!priceLoading">
-          {{productPrices }}
+            <div v-for="shopId in sellerKeys" :key="shopId">
+            
+            <div>{{productPrices[productSku][shopId][0].shopName}}</div>
+            <div v-for="price in productPrices[productSku][shopId]" :key="price +'-'+ shopId">
+              <SfRadio
+                  v-e2e="'procer-option'"
+                  name="Prices"
+                  v-for="price in productPrices[productSku][shopId]"
+                  :key="price.offerId"
+                  :label="$t( '$' +price.price)"
+                  value="price.price"
+                  @input="setSelectedPrice(price.offerId,price.price)"
+                />
+            </div>
+            <div></div>
+          </div>
         </div>
 
 
@@ -144,7 +159,7 @@
             :disabled="loading"
             :canAddToCart="stock > 0"
             class="product__add-to-cart"
-            @click="addToCart(selectedChannel)"
+            @click="addToCart()"
           />
         </div>
 
@@ -243,7 +258,7 @@ import {
 
 import InstagramFeed from '~/components/InstagramFeed.vue';
 import RelatedProducts from '~/components/RelatedProducts.vue';
-import { ref, computed, useRoute, useRouter } from '@nuxtjs/composition-api';
+import { ref, computed, useRoute, useRouter, ssrRef } from '@nuxtjs/composition-api';
 import {
   useProduct,
   useCart,
@@ -252,10 +267,10 @@ import {
   reviewGetters,
   useStore
 } from '@vue-storefront/commercetools';
-import { onSSR } from '@vue-storefront/core';
+import { onSSR, useVSFContext } from '@vue-storefront/core';
 import LazyHydrate from 'vue-lazy-hydration';
 import cacheControl from './../helpers/cacheControl';
-import { useProductPrices } from '~/composables';
+import { useProductPrices, useCartMiraklPrice } from '~/composables';
 
 export default {
   name: 'Product',
@@ -270,10 +285,11 @@ export default {
     const router = useRouter();
     const { products, search } = useProduct('products');
     const { products: relatedProducts, search: searchRelatedProducts, loading: relatedLoading } = useProduct('relatedProducts');
-    const { addItem, loading } = useCart();
+    const { addItem, loading ,setCart} = useCart();
     const { reviews: productReviews, search: searchReviews } = useReview('productReviews');
     const { response: stores } = useStore();
-    const {getProductPrices,loading:priceLoading,productPrices}=useProductPrices(route.value.params.id)
+    const {getProductPrices,loading:priceLoading,productPrices}=useProductPrices(route.value.params.id);
+    const {$ct} = useVSFContext();
 
     // to be added on local useStore factory
     function getSelected(stores) {
@@ -287,6 +303,9 @@ export default {
     const reviews = computed(() => reviewGetters.getItems(productReviews.value));
     const selectedStore = computed(() => getSelected(stores.value));
 
+    let offerId = ssrRef(null);
+    let selectedPriceVal = ssrRef(null);
+
     const channelId = ref(null);
     const channels = computed(() => {
       const productChannels = product.value?.availability?.channels?.results ?? [];
@@ -295,7 +314,12 @@ export default {
     const selectedDelivery = ref(null);
     const setSelectedDelivery = option => selectedDelivery.value = option;
 
-    const setSelectedPrice = (option,selectedChannel) => selectedChannel[productId] = option;
+    const setSelectedPrice = (oId,option) => {
+      offerId.value= oId;
+      selectedPriceVal.value= option;
+
+      console.log(JSON.stringify(offerId));
+    };
 
     const selectedChannel = computed(() => {
       if (selectedDelivery.value !== 'collect') return null;
@@ -307,27 +331,27 @@ export default {
       } : null;
     });
 
-    const addToCart = (selectedChannel) => {
+    const {addProductToCart} = useCartMiraklPrice();
 
-      console.log("selectedChannel :: "+ JSON.stringify(selectedChannel));
-      const sku = selectedChannel[productId];
+    const addToCart =async() => {
 
-      console.log('sku :: '+ JSON.stringify(sku));
-
-      if(sku == null || sku== ''){
+      if(offerId.value == null || selectedPriceVal.value== null){
         console.log('Price not selected!');
         alert("Please Select a Price!")
         return false;
       }
 
-      addItem({
+      const cartUpdated = await addProductToCart({
         product: {
           id: product.value.id,
-          sku
+          sku: product.value.sku
         },
         quantity: parseInt(qty.value),
-        customQuery: selectedChannel.value
+        externalPrice:parseInt(selectedPriceVal.value),
+        offerId:offerId.value
       });
+
+      setCart(cartUpdated);
     };
 
     // TODO: Breadcrumbs are temporary disabled because productGetters return undefined. We have a mocks in data
@@ -357,7 +381,14 @@ export default {
         }
       });
     };
+    
 
+    const productSku = computed(() => {return product?.value?.sku});
+    const sellerKeys = computed(() => {
+      if(productPrices?.value[productSku.value]){
+          return Object.keys(productPrices?.value[productSku.value]);
+      }
+    });
     return {
       addToCart,
       updateFilter,
@@ -385,7 +416,11 @@ export default {
       productId,
       setSelectedPrice,
       priceLoading,
-      productPrices
+      productPrices,
+      productSku,
+      sellerKeys,
+      offerId,
+      selectedPriceVal
     };
   },
   components: {
@@ -458,8 +493,6 @@ export default {
         }
       ],
       //productPrices:null,
-      selectedChannel:{},
-      showPrices:false
     };
   },
     async mounted(){
