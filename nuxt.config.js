@@ -95,21 +95,23 @@ export default {
   publicRuntimeConfig: {
     http: {
       browserBaseURL: process.env.BROWSER_BASE_URL
-    }
+    },
+    middlewareUrl:process.env.BROWSER_BASE_URL
   },
 
   privateRuntimeConfig: {
     http: {
       baseURL: process.env.BASE_URL
-    }
+    },
+    middlewareUrl:process.env.BROWSER_BASE_URL
   },
   http: {
     proxy: true // Can be also an object with default options
   },
 
   proxy: {
-    '/product-prices/': 'http://localhost:8080',
-    '/product-prices-shopIds/': 'http://localhost:8080'
+    '/product-prices/': 'https://mirake-product-price-f4b4o225iq-ue.a.run.app',
+    '/product-prices-shopIds/': 'https://mirake-product-price-f4b4o225iq-ue.a.run.app'
   },
   i18n: {
     currency: 'USD',

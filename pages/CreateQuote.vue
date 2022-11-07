@@ -213,14 +213,35 @@
                 this.errorMessage='';
                 this.showButtons = false;
 
+                console.log("Products :: "+ JSON.stringify(this.products));
+
+                // return false;
+
                   let lineItems = [];
                   for (var i=0 ;i < this.products.length ; i++) {
 
                     var prd= this.products[i];
+
+                    let offerId = null;
+                    if(prd.custom && prd.custom.customFieldsRaw){
+                      offerId = prd.custom.customFieldsRaw.filter(cf => cf.name === 'offer_id')[0].value;
+                    }else{
+                      alert("Error Offer Id Missing!");
+                      return false;
+                    }
+
+                    let priceAmount = prd.price.value.centAmount;
+                    let currencyCode=prd.price.value.currencyCode;
                     let val ={ 
+                      addLineItem: {
                           sku:prd.variant.sku,
-                          quantity: parseInt(prd.quantity) 
+                          quantity: parseInt(prd.quantity),
+                          //price:{value:{centAmount:priceAmount,currencyCode}},
+                          externalPrice:{centPrecision:{centAmount:priceAmount,currencyCode}},
+                          custom:{typeKey:"line-item-type",
+                            fields:[{"name":"offer_id","value":"\""+offerId+"\""}]}
                       }
+                    }
                       lineItems.push(val);
                   }
 
@@ -234,12 +255,13 @@
                         employeeEmail,
                         employeeId,
                         companyId,
-                        lineItems
+                        //lineItems
                       }
                     } ;
 
                   let quoteId =null;
                   let version=null;
+                  let error =false;
                   await this.$apollo.mutate({
                     mutation: CREATE_QUOTE_MUTATION,
                     variables: createQuoteDraft
@@ -253,8 +275,24 @@
                     alert('Error Occured!');
                     this.errorMessage= "Error Creating Quote!";
                     this.showButtons = true;
+                    console.log("Error: "+JSON.stringify(res));
+                    error = true;
                   });
 
+                  const updatedQuote = await this.$vsf.$ct.api.addToCartWithMiraklPrice({
+                      id:quoteId,
+                      version:version,
+                      actions: lineItems
+                    });
+
+
+                    console.log("updatedQuote :: " + JSON.stringify(updatedQuote));
+                    
+                  if(error){
+                    return false;
+                  }
+
+                  version = updatedQuote.data.cart.version;
                   const actions = [
                     {
                       changeState :{

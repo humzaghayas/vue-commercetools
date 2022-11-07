@@ -1,6 +1,164 @@
 const gql =require ('graphql-tag');
-const { CartFragment, CustomerFragment } = require ('@vue-storefront/commercetools-api');
+const {AddressFragment,ShippingMethodFragment, CustomerFragment,ProductPriceFragment } = require ('@vue-storefront/commercetools-api');
 
+
+// import {} from './address';
+// import {} from './customer';
+// import {LineItemFragment} from './line-item';
+// import {} from './shipping-method';
+
+
+const LineItemFragment = `
+  ${ProductPriceFragment}
+
+  fragment DefaultLineItem on LineItem {
+    id
+    productId
+    name(acceptLanguage: $acceptLanguage)
+    productSlug(acceptLanguage: $acceptLanguage)
+    quantity
+    discountedPricePerQuantity {
+      quantity
+      discountedPrice {
+        value {
+          centAmount
+        }
+        includedDiscounts {
+          discount {
+            name(acceptLanguage: $acceptLanguage)
+            isActive
+          }
+        }
+      }
+    }
+
+    custom{
+      customFieldsRaw{
+        value
+        name
+      }
+    }
+    variant {
+      id
+      sku
+      price(currency: $currency) {
+        tiers {
+          value {
+            centAmount
+          }
+        }
+        value {
+          centAmount
+        }
+        discounted {
+          value {
+            centAmount
+          }
+          discount {
+            isActive
+            name(acceptLanguage: $acceptLanguage)
+          }
+        }
+      }
+      images {
+        url
+        label
+      }
+      attributesRaw {
+        name
+        value
+        attributeDefinition {
+          type {
+            name
+          }
+          label(locale: $locale)
+        }
+      }
+    }
+    price {
+      ...DefaultProductPrice
+    }
+  }
+`;
+
+
+
+const CartFragment = gql`
+  ${AddressFragment}
+  ${CustomerFragment}
+  ${LineItemFragment}
+  ${ShippingMethodFragment}
+
+  fragment DefaultCart on Cart {
+    id
+    customerId
+    customerEmail
+    lineItems {
+      ...DefaultLineItem
+    }
+    totalPrice {
+      centAmount
+    }
+    shippingAddress {
+      ...DefaultAddress
+    }
+    billingAddress {
+      ...DefaultAddress
+    }
+    customer {
+      ...DefaultCustomer
+    }
+    totalPrice {
+      centAmount
+    }
+    taxedPrice {
+      totalNet {
+        centAmount
+      }
+      totalGross {
+        centAmount
+      }
+    }
+    paymentInfo {
+      payments {
+        id
+      }
+    }
+    shippingInfo {
+      price {
+        centAmount
+      }
+      shippingMethod {
+        ...DefaultShippingMethod
+      }
+    }
+    discountCodes {
+      discountCode {
+        id
+        code
+        isActive
+        validFrom
+        validUntil
+        name(acceptLanguage: $acceptLanguage)
+      }
+    }
+    refusedGifts {
+      isActive
+      validFrom
+      validUntil
+      name(acceptLanguage: $acceptLanguage)
+    }
+    custom {
+      customFieldsRaw {
+        name
+        value
+      }
+    }
+    cartState
+    version
+    inventoryMode
+  }
+`
 const basicProfile = gql`
   ${CartFragment}
 
