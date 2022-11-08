@@ -47,7 +47,7 @@
           </div> -->
 
           <div v-if="!priceLoading">
-            <div v-for="shopId in sellerKeys" :key="shopId">
+            <!-- <div v-for="shopId in sellerKeys" :key="shopId">
             
             <div>{{productPrices[productSku][shopId][0].shopName}}</div>
             <div v-for="price in productPrices[productSku][shopId]" :key="price +'-'+ shopId">
@@ -62,7 +62,28 @@
                 />
             </div>
             <div></div>
-          </div>
+          </div> -->
+
+             <div class="multiseller" >
+                <ul v-if="lowestOffer != null">
+                  <li style="border: none">
+                    <div class="price">{{lowestOffer.currency +" " + lowestOffer.price}}</div>
+                    <div class="typenew">New</div>
+                    <div class="qty">Qty <input type="number" v-model="offerQty[lowestOffer.offerId]" style="width: 30px;"/><br><br/> Sold By:<b>{{lowestOffer.shopName}}</b></div>
+                    <div class="addtocartbtn"><button @click="addToCart(lowestOffer.offerId,lowestOffer.price)">Add to cart</button></div>
+                  </li>
+                </ul>
+
+                <div class="head" v-if="otherOffers.length > 0">Other Seller</div>
+                  <ul v-for="(offer) in otherOffers" :key="offer.shopId">
+                    <li>
+                      <div class="price">{{offer.currency+" " +offer.price}}</div>
+                      <div class="typenew">New</div>
+                      <div class="qty">Qty <input type="number" v-model="offerQty[offer.offerId]" style="width: 30px;"/><br /><br/> Sold By:<b>{{offer.shopName}}</b></div>
+                      <div class="addtocartbtn"><button @click="addToCart(offer.offerId,offer.price)">Add to cart</button></div>
+                    </li>
+                  </ul>
+            </div>
         </div>
 
 
@@ -114,7 +135,7 @@
             />
           </div> -->
 
-          <div
+          <!-- <div
             class="product__delivery"
             v-if="channels.length > 0"
           >
@@ -160,10 +181,10 @@
             :canAddToCart="stock > 0"
             class="product__add-to-cart"
             @click="addToCart()"
-          />
-        </div>
+          />-->
+        </div> 
 
-        <LazyHydrate when-idle>
+        <!-- <LazyHydrate when-idle>
           <SfTabs :open-tab="1" class="product__tabs">
             <SfTab title="Description">
               <div class="product__description">
@@ -216,7 +237,7 @@
               </div>
             </SfTab>
           </SfTabs>
-        </LazyHydrate>
+        </LazyHydrate> -->
       </div>
     </div>
 
@@ -283,13 +304,15 @@ export default {
     const qty = ref(1);
     const route = useRoute();
     const router = useRouter();
-    const { products, search } = useProduct('products');
+    const { products, search,loading:prodLoading } = useProduct('products');
     const { products: relatedProducts, search: searchRelatedProducts, loading: relatedLoading } = useProduct('relatedProducts');
     const { addItem, loading ,setCart} = useCart();
     const { reviews: productReviews, search: searchReviews } = useReview('productReviews');
     const { response: stores } = useStore();
-    const {getProductPrices,loading:priceLoading,productPrices}=useProductPrices(route.value.params.id);
+    const {getProductPrices,loading:priceLoading,productPrices,lowestOffer, offerQty,otherOffers}=useProductPrices(route.value.params.id);
     const {$ct} = useVSFContext();
+
+    
 
     // to be added on local useStore factory
     function getSelected(stores) {
@@ -333,9 +356,14 @@ export default {
 
     const {addProductToCart} = useCartMiraklPrice();
 
-    const addToCart =async() => {
+    const addToCart =async(offerId,selectedPriceVal) => {
 
-      if(offerId.value == null || selectedPriceVal.value== null){
+      const oQty = offerQty.value[offerId];
+      console.log("offerQty :: "+JSON.stringify(offerQty));
+      console.log("oQty :: "+JSON.stringify(oQty));
+
+
+      if(offerId == null || selectedPriceVal== null){
         console.log('Price not selected!');
         alert("Please Select a Price!")
         return false;
@@ -346,9 +374,9 @@ export default {
           id: product.value.id,
           sku: product.value.sku
         },
-        quantity: parseInt(qty.value),
-        externalPrice:parseInt(selectedPriceVal.value),
-        offerId:offerId.value
+        quantity: parseInt(oQty),
+        externalPrice:parseInt(selectedPriceVal),
+        offerId
       });
 
       setCart(cartUpdated);
@@ -367,7 +395,7 @@ export default {
 
     onSSR(async () => {
       await search({ id: route.value.params.id });
-      await getProductPrices(product.value.sku)
+      await getProductPrices(product.value.sku);
       await searchRelatedProducts({ catId: [categories.value[0]], limit: 8 });
       await searchReviews({ productId: route.value.params.id });
     });
@@ -384,12 +412,15 @@ export default {
     
 
     const productSku = computed(() => {return product?.value?.sku});
-    const sellerKeys = computed(() => {
-      if(productPrices?.value[productSku.value]){
-          return Object.keys(productPrices?.value[productSku.value]);
-      }
-    });
-    return {
+    // const sellerKeys = computed(() => {
+    //   if(productPrices?.value[productSku.value]){
+    //       return Object.keys(productPrices?.value[productSku.value]);
+    //   }
+    // });
+
+
+
+   return {
       addToCart,
       updateFilter,
       configuration,
@@ -418,9 +449,13 @@ export default {
       priceLoading,
       productPrices,
       productSku,
-      sellerKeys,
+      //sellerKeys,
       offerId,
-      selectedPriceVal
+      selectedPriceVal,
+      lowestOffer,
+      offerQty,
+      prodLoading,
+      otherOffers
     };
   },
   components: {
@@ -531,6 +566,64 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+
+
+.multiseller {
+  width: 400px;
+  .head {
+    margin: 5px 0;
+    font-size: 20px;
+  }
+  ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li{
+    border-top: 1px solid #ccc;
+    margin-top: 15px;
+    padding: 20px 0;
+    font-size: 15px;
+  }
+  li .price {
+    float: left;
+    width: 20%;
+    font-weight: bold;
+    text-align: center;
+    font-size: 20px;
+
+  }
+  li .typenew {
+    float: left;
+    width: 15%;
+    text-align: center;
+
+  }
+  li .qty {
+    float: left;
+    width: 25%;
+    text-align: center;
+    font-size: 12px;
+
+  }
+  li .addtocartbtn {
+    text-align: center;
+
+  }
+  li .addtocartbtn button{
+    text-align: center;
+    padding: 10px 35px;
+    background-color: #5F4BA0;
+    border-radius: 5px;
+    border-color: #5F4BA0;
+    color: #fff;
+    box-shadow: none;
+
+  }
+}
+
+
 #product {
   box-sizing: border-box;
   @include for-desktop {
